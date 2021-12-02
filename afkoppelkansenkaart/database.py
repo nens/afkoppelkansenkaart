@@ -59,6 +59,16 @@ class Database:
             self.gpkg_path = path.absolute()
             self.datasource = ogr.Open(str(filename), update=1)
 
+    def execute_sql_file(self, basename):
+        conn = sqlite3.connect(self.gpkg_path)
+        cur = conn.cursor()
+
+        sql_fn = SQL_DIR / str(basename + '.sql')
+
+        with open(sql_fn) as file:
+            sql = file.read()
+            cur.executescript(sql)
+
     def _register_epsg(self):
         """
         Register self.srs in geopackage
@@ -162,6 +172,15 @@ class Database:
                 """
         self.datasource.ExecuteSQL(sql)
 
+    def update_gpkg_ogr_contents(self, table_name):
+        sql = f"""DELETE FROM gpkg_ogr_contents WHERE table_name = '{table_name}';"""
+        self.datasource.ExecuteSQL(sql)
+        sql = f"""
+            INSERT INTO gpkg_ogr_contents (table_name, feature_count) 
+            VALUES ('{table_name}', (SELECT count(*) FROM {table_name}));
+        """
+        self.datasource.ExecuteSQL(sql)
+
 
 class AfkoppelKansenKaartDatabase(Database):
 
@@ -169,40 +188,39 @@ class AfkoppelKansenKaartDatabase(Database):
     BUURT = 'buurt'
     WIJK = 'wijk'
     SCORE_ZOEKTABEL = 'score_zoektabel'
-    EINDSCORE_DEEL = 'eindscore_deel'
+    HOOFDONDERDEEL = 'hoofdonderdeel'
     DOMEIN = 'domein'
     CRITERIUM = 'criterium'
     WEGING = 'weging'
 
-    PERCEEL_CRITERIUMSCORES = 'perceel_criteriumscores'
+    PERCEEL_CRITERIUMSCORE = 'perceel_criteriumscore'
+    PERCEEL_DOMEINSCORE = 'perceel_domeinscore'
+    PERCEEL_HOOFDONDERDEELSCORE = 'perceel_hoofdonderdeelscore'
+    PERCEEL_EINDSCORE = 'perceel_eindscore'
 
     TABLES_GEOMETRY_TYPES = {
         PERCEEL: MULTIPOLYGON,
         BUURT: MULTIPOLYGON,
         WIJK: MULTIPOLYGON,
         SCORE_ZOEKTABEL: None,
-        EINDSCORE_DEEL: None,
+        HOOFDONDERDEEL: None,
         DOMEIN: None,
         CRITERIUM: None,
         WEGING: None
     }
 
     VIEWS_GEOMETRY_TYPES = {
-        PERCEEL_CRITERIUMSCORES: MULTIPOLYGON
+        PERCEEL_CRITERIUMSCORE: None,
+        PERCEEL_DOMEINSCORE: None,
+        PERCEEL_HOOFDONDERDEELSCORE: None,
+        PERCEEL_EINDSCORE: None
     }
 
-    TABLES = TABLES_GEOMETRY_TYPES.keys()
-    VIEWS = VIEWS_GEOMETRY_TYPES.keys()
+    TABLES = list(TABLES_GEOMETRY_TYPES.keys())
+    VIEWS = list(VIEWS_GEOMETRY_TYPES.keys())
 
     def create_schema(self):
-        conn = sqlite3.connect(self.gpkg_path)
-        cur = conn.cursor()
-
-        sql_fn = SQL_DIR / 'schema.sql'
-
-        with open(sql_fn) as file:
-            sql = file.read()
-            [cur.execute(statement) for statement in sql.split(';')]
+        self.execute_sql_file('schema')
         self._register_layers()
 
     def _register_layers(self):
@@ -210,4 +228,13 @@ class AfkoppelKansenKaartDatabase(Database):
         for layer_name, geometry_type in {**self.TABLES_GEOMETRY_TYPES, **self.VIEWS_GEOMETRY_TYPES}.items():
             self.register_gpkg_layer(layer_name=layer_name, geometry_type=geometry_type)
             self.calculate_layer_extents(layer_name=layer_name)
+        self._update_gpkg_ogr_contents_all_layers()
 
+    def _update_gpkg_ogr_contents_all_layers(self):
+        for layer_name in (self.TABLES + self.VIEWS):
+            print(layer_name)
+            self.update_gpkg_ogr_contents(table_name=layer_name)
+
+    def initialise(self):
+        self.execute_sql_file('initialisation')
+        self._update_gpkg_ogr_contents_all_layers()
