@@ -43,8 +43,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>403</width>
-         <height>937</height>
+         <width>424</width>
+         <height>855</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -126,7 +126,7 @@ color: rgb(0, 0, 0);</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>200</height>
+            <height>40</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -144,7 +144,7 @@ color: rgb(0, 0, 0);</string>
              <x>10</x>
              <y>20</y>
              <width>357</width>
-             <height>196</height>
+             <height>61</height>
             </rect>
            </property>
            <layout class="QFormLayout" name="formLayout_2">
@@ -154,85 +154,11 @@ color: rgb(0, 0, 0);</string>
                <string notr="true">color: rgb(170, 255, 255);</string>
               </property>
               <property name="text">
-               <string>Host:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_2">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="text">
-               <string>Port:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="spinBox_Port">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="maximum">
-               <number>99999</number>
-              </property>
-              <property name="value">
-               <number>5432</number>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="text">
-               <string>User:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_User">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="text">
-               <string>Password:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="lineEdit_Password">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="text">
                <string>Database:</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QLineEdit" name="lineEdit_Database">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
+            <item row="1" column="0">
              <widget class="QPushButton" name="pushButton_CheckConnection">
               <property name="styleSheet">
                <string notr="true">color: rgb(170, 255, 255);</string>
@@ -242,7 +168,7 @@ color: rgb(0, 0, 0);</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="1" column="1">
              <widget class="QLabel" name="label_StatusValue">
               <property name="styleSheet">
                <string notr="true">color: rgb(170, 255, 255);</string>
@@ -253,11 +179,7 @@ color: rgb(0, 0, 0);</string>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_Host">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-             </widget>
+             <widget class="QComboBox" name="comboBox_PostGISDatabases"/>
             </item>
            </layout>
           </widget>
