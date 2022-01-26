@@ -182,7 +182,8 @@ class Database:
         self.datasource.ExecuteSQL(sql)
 
 
-class AfkoppelKansenKaartDatabase(Database):
+class MCADatabase(Database):
+    """Database with tables and views to perform multi-criteria analysis"""
 
     PERCEEL = 'perceel'
     BUURT = 'buurt'
@@ -197,6 +198,8 @@ class AfkoppelKansenKaartDatabase(Database):
     PERCEEL_DOMEINSCORE = 'perceel_domeinscore'
     PERCEEL_HOOFDONDERDEELSCORE = 'perceel_hoofdonderdeelscore'
     PERCEEL_EINDSCORE = 'perceel_eindscore'
+    BUURT_EINDSCORE = 'buurt_eindscore'
+    WIJK_EINDSCORE = 'wijk_eindscore'
 
     TABLES_GEOMETRY_TYPES = {
         PERCEEL: MULTIPOLYGON,
@@ -213,15 +216,65 @@ class AfkoppelKansenKaartDatabase(Database):
         PERCEEL_CRITERIUMSCORE: None,
         PERCEEL_DOMEINSCORE: None,
         PERCEEL_HOOFDONDERDEELSCORE: None,
-        PERCEEL_EINDSCORE: None
+        PERCEEL_EINDSCORE: None,
+        BUURT_EINDSCORE: MULTIPOLYGON,
+        WIJK_EINDSCORE: MULTIPOLYGON
     }
 
     TABLES = list(TABLES_GEOMETRY_TYPES.keys())
     VIEWS = list(VIEWS_GEOMETRY_TYPES.keys())
 
+    def __init__(self, result_view_name: str):
+        super().__init__()
+        self.result_view_name = result_view_name
+
     def create_schema(self):
         self.execute_sql_file('schema')
         self._register_layers()
+
+    def create_pivot_view(self):
+        """Create a view containing one row for each perceel.
+        Fields are all original perceel attributes plus all the scores as columns
+        (i.e. 'pivoted' from the normalized score tables)"""
+
+        select_clauses = []
+        criterium_lyr = self.datasource.GetLayerByName('criterium')
+        domein_lyr = self.datasource.GetLayerByName('domein')
+        hoofdonderdeel_lyr = self.datasource.GetLayerByName('hoofdonderdeel')
+        for row in criterium_lyr:
+            sql = f"""sum(case when criterium.criterium_id = {row.GetFID()} then criterium.score end) as {row[0]}"""
+            select_clauses.append(sql)
+
+        for row in domein_lyr:
+            sql = f"""sum(case when domein.domein_id = {row.GetFID()} then domein.score end) as {row[0]}"""
+            select_clauses.append(sql)
+
+        for row in hoofdonderdeel_lyr:
+            sql = f"""sum(case when hoofdonderdeel.hoofdonderdeel_id = {row.GetFID()} then hoofdonderdeel.score end) as {row[0]}"""
+            select_clauses.append(sql)
+
+        select_clauses_str = ', '.join(select_clauses)
+
+        sql = f"""
+            CREATE VIEW IF NOT EXISTS {self.result_view_name} AS
+            SELECT  perceel.*,
+                    {select_clauses_str},
+                    eind.score as eindscore
+            FROM    perceel
+            LEFT JOIN perceel_criteriumscore as criterium
+                ON  perceel.id = criterium.criterium_id
+            LEFT JOIN perceel_domeinscore as domein
+                ON  perceel.id = domein.perceel_id
+            LEFT JOIN perceel_hoofdonderdeelscore as hoofdonderdeel
+                ON  perceel.id = hoofdonderdeel.perceel_id
+            LEFT JOIN perceel_eindscore AS eind
+                ON  perceel.id = eind.perceel_id
+            ;
+        """
+        self.datasource.ExecuteSQL(sql)
+        self.register_gpkg_layer(layer_name=self.result_view_name, geometry_type=MULTIPOLYGON)
+        self.calculate_layer_extents(layer_name=self.result_view_name)
+        self.update_gpkg_ogr_contents(table_name=self.result_view_name)
 
     def _register_layers(self):
         """Register all layers and views as geopackage layers"""
@@ -232,9 +285,15 @@ class AfkoppelKansenKaartDatabase(Database):
 
     def _update_gpkg_ogr_contents_all_layers(self):
         for layer_name in (self.TABLES + self.VIEWS):
-            print(layer_name)
             self.update_gpkg_ogr_contents(table_name=layer_name)
 
     def initialise(self):
         self.execute_sql_file('initialisation')
         self._update_gpkg_ogr_contents_all_layers()
+
+
+class AfkoppelKansenKaartDatabase(MCADatabase):
+    def calc_verhardingspercentage(self):
+        pass
+
+

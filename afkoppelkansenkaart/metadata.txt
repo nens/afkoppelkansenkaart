@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Afkoppelkansenkaart
+qgisMinimumVersion=3.16
+description=Bepaal de effectiviteit en kansrijkheid van het afkoppelen van de riolering
+version=0.1
+author=Nelen & Schuurmans
+email=info@nelen-schuurmans.nl
+
+about=Bepaal de effectiviteit en kansrijkheid van het afkoppelen van de riolering. <a href="https://www.flaticon.com/free-icons/saw" title="saw icons">Saw icon created by Icongeek26 - Flaticon</a>
+
+tracker=https://github.com/nens/afkoppelkansenkaart/issues
+repository=https://github.com/nens/afkoppelkansenkaart
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=sewerage, open data, netherlands
+
+homepage=https://www.nelen-schuurmans.nl
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+

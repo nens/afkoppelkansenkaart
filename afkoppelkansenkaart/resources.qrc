@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/plugins/afkoppelkansenkaart" >
+        <file>icon.png</file>
+		<file>icon_with_gutter_pipe.png</file>
+    </qresource>
+</RCC>

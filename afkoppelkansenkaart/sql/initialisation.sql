@@ -4,33 +4,33 @@ DELETE FROM criterium;
 DELETE FROM domein;
 DELETE FROM hoofdonderdeel;
 
-INSERT INTO hoofdonderdeel (id, omschrijving)
-VALUES  (1, 'Fysieke kansrijkheid'),
-        (2, 'Effectiviteit')
+INSERT INTO hoofdonderdeel (id, naam, omschrijving)
+VALUES  (1, 'fysieke_kansrijkheid', 'Fysieke kansrijkheid'),
+        (2, 'effectiviteit', 'Effectiviteit')
 ;
 
-INSERT INTO domein (id, omschrijving, hoofdonderdeel_id)
-values  (1, 'Verharding', 1),
-        (2, 'Infiltratie', 1),
-        (3, 'Afstand', 1),
-        (4, 'Transport', 2),
-        (5, 'Oppervlaktewater', 2),
-        (6, 'Wateroverlast', 2),
-        (7, 'Effici�ntie', 2)
+INSERT INTO domein (id, naam, omschrijving, hoofdonderdeel_id)
+values  (1, 'verharding', 'Verharding', 1),
+        (2, 'infiltratie', 'Infiltratie', 1),
+        (3, 'afstand', 'Afstand', 1),
+        (4, 'transport', 'Transport', 2),
+        (5, 'oppervlaktewater', 'Oppervlaktewater', 2),
+        (6, 'wateroverlast', 'Wateroverlast', 2),
+        (7, 'efficientie', 'Effici�ntie', 2)
 ;
 
-INSERT INTO criterium (id, omschrijving, domein_id)
-VALUES  (1,'Percentage verharding', 1),
-        (2,'Percentage bebouwing', 1),
-        (3,'Hoeveelheid berging ondergrond (diepte GHG beneden maaiveld)', 2),
-        (4,'Doorlatendheid (k-waarde)', 2),
-        (5,'Afstand tot eventuele bergingslocatie', 3),
-        (6, 'Type stelsel dichtsbijzijnde riolering', 4),
-        (7,'Aantal keer verpompen naar RWZI', 4),
-        (8,'Transportafstand naar RWZI', 4),
-        (9, 'Belasting oppervlaktewater waarin riolering overstort', 5),
-        (10, 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
-        (11,'Grootte van het af te koppelen verhard oppervlak', 7)
+INSERT INTO criterium (id, naam, omschrijving, domein_id)
+VALUES  (1, 'verhardingspercentage', 'Percentage verharding', 1),
+        (2, 'bebouwingspercentage', 'Percentage bebouwing', 1),
+        (3, 'bodemberging', 'Hoeveelheid berging ondergrond (diepte GHG beneden maaiveld)', 2),
+        (4, 'doorlatendheid', 'Doorlatendheid (k-waarde)', 2),
+        (5, 'afstand_tot_bergingslocatie', 'Afstand tot eventuele bergingslocatie', 3),
+        (6, 'stelseltype', 'Type stelsel dichtsbijzijnde riolering', 4),
+        (7, 'aantal_verpompen', 'Aantal keer verpompen naar RWZI', 4),
+        (8, 'afstand_rwzi', 'Transportafstand naar RWZI', 4),
+        (9, 'belasting_oppervlaktewater', 'Belasting oppervlaktewater waarin riolering overstort', 5),
+        (10, 'gebiedstype_wateroverlast', 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
+        (11, 'af_te_koppelen_oppervlak', 'Grootte van het af te koppelen verhard oppervlak', 7)
 ;
 
 INSERT INTO weging (score_type, score_id, factor)

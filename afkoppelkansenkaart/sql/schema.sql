@@ -66,17 +66,20 @@ CREATE TABLE score_zoektabel (
 
 CREATE TABLE hoofdonderdeel (
 	id integer PRIMARY KEY AUTOINCREMENT,
+	naam text,
 	omschrijving text
 );
 
 CREATE TABLE domein (
 	id integer PRIMARY KEY AUTOINCREMENT,
+	naam text,
 	omschrijving text,
 	hoofdonderdeel_id integer REFERENCES hoofdonderdeel(id)
 );
 
 CREATE TABLE criterium (
 	id integer PRIMARY KEY AUTOINCREMENT,
+	naam text,
 	omschrijving text,
 	domein_id integer REFERENCES domein(id)
 );
@@ -155,6 +158,30 @@ LEFT JOIN weging
         AND score_id = hoofdonderdeel.id
 GROUP BY phs.id, phs.perceel_id
 ;
+
+CREATE VIEW IF NOT EXISTS buurt_eindscore AS
+SELECT  buurt.*,
+        ROUND(SUM(ST_Area(perceel) * eind.score) / SUM(ST_Area(perceel)), 3) as gemiddelde_eindscore
+FROM    buurt
+LEFT JOIN perceel
+    ON  ST_Intersects(perceel.geom, buurt.geom)
+JOIN    perceel_eindscore AS eind
+    ON  perceel.id = eind.id
+GROUP BY buurt.naam
+;
+
+
+CREATE VIEW IF NOT EXISTS wijk_eindscore AS
+SELECT  wijk.*,
+        ROUND(SUM(ST_Area(perceel) * eind.score) / SUM(ST_Area(perceel)), 3) as gemiddelde_eindscore
+FROM    wijk
+LEFT JOIN perceel
+    ON  ST_Intersects(perceel.geom, wijk.geom)
+JOIN    perceel_eindscore AS eind
+    ON  perceel.id = eind.id
+GROUP BY wijk.naam
+;
+
 
 --CREATE VIEW IF NOT EXISTS perceel_criteriumscores AS
 --SELECT	perceel.*,
@@ -235,10 +262,4 @@ GROUP BY phs.id, phs.perceel_id
 --        AND perceel.verhard_oppervlak <= zoek_11.klasse_bovengrens
 --        AND zoek_11.criterium_id = 11
 --;
-        
--- Toevoegen buurt, wijk
-
-
--- Toevoegen aggregatie op buurt, wijk
-
 

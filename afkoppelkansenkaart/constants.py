@@ -1,0 +1,1 @@
+PARCELS_WFS_URL = "pagingEnabled='true' restrictToRequestBBOX='1' srsname='EPSG:28992' typename='kadastralekaartv4:perceel' url='https://geodata.nationaalgeoregister.nl/kadastralekaart/wfs/v4_0' version='2.0.0'"
