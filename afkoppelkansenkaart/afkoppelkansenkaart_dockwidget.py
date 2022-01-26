@@ -26,11 +26,26 @@ import os
 import sys
 sys.path.append(os.path.dirname(__file__))
 
+import db_manager.db_plugins.postgis.connector as con
 from qgis.PyQt import QtGui, QtWidgets, uic
+from qgis.PyQt.QtWidgets import QProgressBar
 from qgis.PyQt.QtCore import pyqtSignal, QSettings
-from qgis.core import QgsProject,QgsVectorLayer,QgsRasterLayer,QgsMapLayerProxyModel, QgsProcessingFeatureSourceDefinition
-
+from qgis.core import (
+    NULL,
+    Qgis,
+    QgsProject,
+    QgsVectorLayer,
+    QgsRasterLayer,
+    QgsMapLayerProxyModel,
+    QgsProcessingFeatureSourceDefinition,
+    QgsProcessingFeedback,
+    QgsApplication,
+    QgsAuthMethodConfig,
+    QgsDataSourceUri
+)
+from qgis.utils import iface
 import processing
+
 
 import psycopg2
 
@@ -48,16 +63,34 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         """Constructor."""
         super(AfkoppelKansenKaartDockWidget,self).__init__(parent)
 
-        self.parcel_layer_id = None
-
+        try:
+            self._parcel_layer_id = QgsProject.instance().mapLayersByName('Kadastraal perceel')[0].id()
+        except IndexError:  # No layer of that name exists:
+            self._parcel_layer_id = None
         self.setupUi(self)
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
-        self.pushButton_CheckConnection.clicked.connect(self.update_postgis_connection_status)
+        self.comboBox_PostGISDatabases.currentIndexChanged.connect(self.update_postgis_connection_status)
         self.populate_combobox_postgis_databases()
+        self.pushButton_PercelenNaarPG.clicked.connect(self.import_parcels_wfs_to_postgis)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
         event.accept()
+
+    @property
+    def connection_name(self):
+        return self.comboBox_PostGISDatabases.currentText()
+
+    @property
+    def parcel_layer_id(self):
+        if QgsProject.instance().mapLayer(self._parcel_layer_id):
+            return self._parcel_layer_id
+        else:
+            return None
+
+    @parcel_layer_id.setter
+    def parcel_layer_id(self, id: str):
+        self._parcel_layer_id = id
 
     def list_postgis_connections(self):
         s = QSettings()
@@ -70,6 +103,27 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.comboBox_PostGISDatabases.clear()
         self.comboBox_PostGISDatabases.addItems(self.list_postgis_connections())
 
+    @staticmethod
+    def get_pscycopg_connection_params(connection_name: str):
+        s = QSettings()
+        s.beginGroup(f"PostgreSQL/connections/{connection_name}")
+        result = {
+            'host': s.value('host'),
+            'port': s.value('port'),
+            'user': s.value('username'),
+            'password': s.value('password'),
+            'dbname': s.value('database'),
+        }
+        if result['password'] == '':
+            authcfg = s.value('authcfg')
+            auth_mgr = QgsApplication.authManager()
+            auth_method_config = QgsAuthMethodConfig()
+            auth_mgr.loadAuthenticationConfig(authcfg, auth_method_config, True)
+            config_map = auth_method_config.configMap()
+            result['user'] = config_map['username']
+            result['password'] = config_map['password']
+        return result
+
     def add_parcel_wfs(self):
         if self.parcel_layer_id:
             QgsProject.instance().removeMapLayer(self.parcel_layer_id)
@@ -77,25 +131,9 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         QgsProject.instance().addMapLayer(vlayer)
         self.parcel_layer_id = vlayer.id()
 
-    def get_postgis_connection_params(self):
-        host = self.lineEdit_Host.text()
-        port = self.spinBox_Port.value()
-        user = self.lineEdit_User.text()
-        password = self.lineEdit_Password.text()
-        dbname = self.lineEdit_Database.text()
-
-        db_params = {
-            'host': host,
-            'port': port,
-            'user': user,
-            'password': password,
-            'dbname': dbname,
-        }
-        return db_params
-
     def postgis_connection_is_valid(self):
         try:
-            conn = psycopg2.connect(**self.get_postgis_connection_params())
+            conn = psycopg2.connect(**self.get_pscycopg_connection_params(self.connection_name))
         except psycopg2.OperationalError:
             return False
         conn.close()
@@ -103,24 +141,45 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def update_postgis_connection_status(self):
         if self.postgis_connection_is_valid():
-            self.label_StatusValue.setText('Valid connection details')
+            self.label_StatusValue.setText('Database ready')
         else:
             self.label_StatusValue.setText('Invalid connection details')
 
     def import_parcels_wfs_to_postgis(self):
-        feature_source = QgsProcessingFeatureSourceDefinition(source=self.parcel_layer_id, selectedFeaturesOnly = True)
-        processing_args = {
-            'INPUT': feature_source,
-            'DATABASE': 'localhost - sandbox',
-            'SCHEMA': 'public',
-            'TABLENAME': 'kadastraal_perceel',
-            'PRIMARY_KEY': 'id',
-            'GEOMETRY_COLUMN': 'geom',
-            'ENCODING': 'UTF-8',
-            'OVERWRITE': True,
-            'CREATEINDEX': True,
-            'LOWERCASE_NAMES': True,
-            'DROP_STRING_LENGTH': True,
-            'FORCE_SINGLEPART': False
-        }
-        processing.run("qgis:importintopostgis",
+        if self.parcel_layer_id:
+            feature_source = QgsProcessingFeatureSourceDefinition(source=self.parcel_layer_id, selectedFeaturesOnly=True)
+            processing_args = {
+                'INPUT': feature_source,
+                'DATABASE': self.connection_name,
+                'SCHEMA': 'public',
+                'TABLENAME': 'kadastraal_perceel',
+                'PRIMARY_KEY': 'id',
+                'GEOMETRY_COLUMN': 'geom',
+                'ENCODING': 'UTF-8',
+                'OVERWRITE': True,
+                'CREATEINDEX': True,
+                'LOWERCASE_NAMES': True,
+                'DROP_STRING_LENGTH': True,
+                'FORCE_SINGLEPART': False
+            }
+            # Progression bar
+            iface.messageBar().clearWidgets()
+            progress_message_bar = iface.messageBar()
+            progressbar = QProgressBar()
+            progress_message_bar.pushWidget(progressbar)
+
+            # Processing feedback
+            def progress_changed(progress):
+                progressbar.setValue(progress)
+
+            feedback = QgsProcessingFeedback()
+            feedback.progressChanged.connect(progress_changed)
+            processing.runAndLoadResults("qgis:importintopostgis", processing_args, feedback=feedback)
+            # iface.messageBar().clearWidgets()
+        else:
+            iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                "Laad eerst de percelen in via 'Laad percelen (WFS)'",
+                level=Qgis.Warning,
+                duration=3  # wat langer zodat gebruiker tijd heeft om op linkje te klikken
+            )
