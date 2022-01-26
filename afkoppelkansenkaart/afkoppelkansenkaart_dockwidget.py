@@ -25,9 +25,12 @@
 import os
 import sys
 sys.path.append(os.path.dirname(__file__))
+
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import QgsProject,QgsVectorLayer,QgsRasterLayer,QgsMapLayerProxyModel
+
+import psycopg2
 
 # Initialize Qt resources from file resources.py
 from .constants import *
@@ -44,6 +47,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         super(AfkoppelKansenKaartDockWidget,self).__init__(parent)
         self.setupUi(self)
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
+        self.pushButton_CheckConnection.clicked.connect(self.update_postgis_connection_status)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
@@ -53,3 +57,29 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def add_parcel_wfs(self):
         vlayer = QgsVectorLayer(PARCELS_WFS_URL, "Kadastraal perceel", "WFS")
         QgsProject.instance().addMapLayer(vlayer)
+
+    def get_postgis_connection_params(self):
+        host = self.lineEdit_Host.text()
+        port = self.spinBox_Port.value()
+        user = self.lineEdit_User.text()
+        password = self.lineEdit_Password.text()
+        dbname = self.lineEdit_Database.text()
+
+        db_params = {
+            'host': host,
+            'port': port,
+            'user': user,
+            'password': password,
+            'dbname': dbname,
+        }
+        return db_params
+
+    def update_postgis_connection_status(self):
+        try:
+            conn = psycopg2.connect(**self.get_postgis_connection_params())
+        except psycopg2.OperationalError:
+            self.label_StatusValue.setText('Invalid connection details')
+            return
+        self.label_StatusValue.setText('Valid connection details')
+        conn.close()
+        return
