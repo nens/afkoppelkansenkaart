@@ -99,7 +99,7 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
         if dem_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_DEM))
             
-        success_param = self.parameterAsBool(
+        self.parameterAsBool(
             parameters,
             self.OUTPUT,
             context,
@@ -115,7 +115,7 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
             'INPUT_VECTOR': parameters[self.INPUT_POL],
             'INPUT_RASTER': parameters[self.INPUT_DEM],
             'RASTER_BAND':1,
-            'COLUMN_PREFIX':'hoogteligging_',
+            'COLUMN_PREFIX':'maaiveldhoogte_',
             'STATISTICS':[3], #MEDIAN
             }, context=context, feedback=feedback, is_child_algorithm=True)
             
@@ -140,9 +140,7 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
 
-        help_string = "Hoogtebepaling op basis van percelen"
-
-        return self.tr(help_string)
+        return self.tr("Hoogtebepaling op basis van percelen2")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)

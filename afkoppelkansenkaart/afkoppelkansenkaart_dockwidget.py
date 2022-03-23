@@ -217,19 +217,9 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             level=Qgis.Info,
             duration=10)
             
-        # self.comboBox_Bewerkingen.currentData().run()
-        # params = {}  # A dictionary to load some default value in the dialog
-        processing.execAlgorithmDialog('Afkoppelkansenkaart:heightestimator', {})
-        
-        #processing.execAlgorithmDialog("native:buffer", {
-        #       'INPUT': '/data/lines.shp',
-        #       'DISTANCE': 100.0,
-        #       'SEGMENTS': 10,
-        #       'DISSOLVE': True,
-        #       'END_CAP_STYLE': 0,
-        #       'JOIN_STYLE': 0,
-        #       'MITER_LIMIT': 10,
-        #       'OUTPUT': '/data/buffers.shp'})
+        algo_name = self.comboBox_Bewerkingen.currentData().name()
+        params = {}  # A dictionary to load some default value in the dialog
+        processing.execAlgorithmDialog(f'Afkoppelkansenkaart:{algo_name}', {})
         
         # self.import_parcels_wfs_to_postgis()
         # self.subdivide_parcels()
