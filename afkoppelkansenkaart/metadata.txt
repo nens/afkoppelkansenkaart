@@ -18,7 +18,7 @@ repository=https://github.com/nens/afkoppelkansenkaart
 
 # Recommended items:
 
-hasProcessingProvider=no
+hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
 
