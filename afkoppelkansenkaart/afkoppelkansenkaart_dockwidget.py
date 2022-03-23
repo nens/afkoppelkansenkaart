@@ -54,6 +54,7 @@ import psycopg2
 
 from .constants import *
 from afkoppelkansenkaart.database import *
+from qgis.core import QgsProcessingProvider
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'afkoppelkansenkaart_dockwidget_base.ui'))
@@ -62,7 +63,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     closingPlugin=pyqtSignal()
     
-    def __init__(self,parent=None):
+    def __init__(self,parent, provider):
         """Constructor."""
         super(AfkoppelKansenKaartDockWidget,self).__init__(parent)
 
@@ -79,8 +80,9 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
         self.comboBox_PostGISDatabases.currentIndexChanged.connect(self.update_postgis_connection_status)
         self.populate_combobox_postgis_databases()
-        self.pushButton_Play.clicked.connect(self.percelen_naar_pg_clicked)
-        self.populate_combobox_bewerkingen()
+        self.pushButton_Play.clicked.connect(self.play_clicked)
+        self.populate_combobox_bewerkingen(provider.algorithms())
+        self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
@@ -150,9 +152,11 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.comboBox_PostGISDatabases.clear()
         self.comboBox_PostGISDatabases.addItems(self.list_postgis_connections())
 
-    def populate_combobox_bewerkingen(self):
-        for i, bewerking in enumerate(BEWERKINGEN):
-            self.comboBox_Bewerkingen.addItem(f'{1+i}. {bewerking}')
+    def populate_combobox_bewerkingen(self, algos):
+        for i, algo in enumerate(algos):
+            self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.name()}')
+            
+        self.update_bewerking(0)
 
     def nieuw_clicked(self):
         filename, _ = QFileDialog.getSaveFileName(self, "Nieuwe afkoppelkansenkaart", "", "GeoPackage (*.gpkg)")
@@ -205,16 +209,23 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
                 duration=3
             )
 
-    def percelen_naar_pg_clicked(self):
-        self.import_parcels_wfs_to_postgis()
-        self.subdivide_parcels()
-        postgis_parcel_source_layer = self.get_postgis_layer(
-            'kadastraal_perceel_subdivided',
-            qgis_layer_name = "Perceel (PostGIS)"
-        )
-        self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
-        # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
-        self.add_to_layer_tree_group(postgis_parcel_source_layer)
+    def play_clicked(self):
+        # Run the selected Processor
+        iface.messageBar().pushMessage(
+            MESSAGE_CATEGORY,
+            f"Start algoritme: ({self.comboBox_Bewerkingen.currentText()})",
+            level=Qgis.Info,
+            duration=10)
+        
+        # self.import_parcels_wfs_to_postgis()
+        # self.subdivide_parcels()
+        # postgis_parcel_source_layer = self.get_postgis_layer(
+        #     'kadastraal_perceel_subdivided',
+        #     qgis_layer_name = "Perceel (PostGIS)"
+        # )
+        # self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
+        # # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
+        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
 
     @staticmethod
     def get_pscycopg_connection_params(connection_name: str):
@@ -257,6 +268,15 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self.label_StatusValue.setText('Database ready')
         else:
             self.label_StatusValue.setText('Invalid connection details')
+            
+    def update_bewerking(self, text):
+        iface.messageBar().pushMessage(
+            MESSAGE_CATEGORY,
+            f"Gelesteerd algoritme: ({text})",
+            level=Qgis.Info,
+            duration=10)
+        
+        
 
     def import_parcels_wfs_to_postgis(self):
         if self.parcel_layer_id:

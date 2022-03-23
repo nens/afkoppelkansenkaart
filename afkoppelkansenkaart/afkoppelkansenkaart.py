@@ -231,7 +231,7 @@ class AfkoppelKansenKaart:
             #    removed on close (see self.onClosePlugin method)
             if self.dockwidget == None:
                 # Create the dockwidget (after translation) and keep reference
-                self.dockwidget = AfkoppelKansenKaartDockWidget()
+                self.dockwidget = AfkoppelKansenKaartDockWidget(None, self.provider)
 
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
