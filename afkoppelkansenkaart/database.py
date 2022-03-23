@@ -255,6 +255,9 @@ class MCADatabase(Database):
 
         select_clauses_str = ', '.join(select_clauses)
 
+        # sql = f"""DROP VIEW IF EXISTS {self.result_view_name};"""
+        # self.datasource.ExecuteSQL(sql)
+
         sql = f"""
             CREATE VIEW IF NOT EXISTS {self.result_view_name} AS
             SELECT  perceel.*,
@@ -293,6 +296,9 @@ class MCADatabase(Database):
 
 
 class AfkoppelKansenKaartDatabase(MCADatabase):
+    def __init__(self):
+        super().__init__(result_view_name='afkoppelkansenkaart')
+
     def calc_verhardingspercentage(self):
         pass
 

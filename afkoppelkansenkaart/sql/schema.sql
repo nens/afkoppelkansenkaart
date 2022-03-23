@@ -161,7 +161,7 @@ GROUP BY phs.id, phs.perceel_id
 
 CREATE VIEW IF NOT EXISTS buurt_eindscore AS
 SELECT  buurt.*,
-        ROUND(SUM(ST_Area(perceel) * eind.score) / SUM(ST_Area(perceel)), 3) as gemiddelde_eindscore
+        ROUND(SUM(ST_Area(perceel.geom) * eind.score) / SUM(ST_Area(perceel.geom)), 3) as gemiddelde_eindscore
 FROM    buurt
 LEFT JOIN perceel
     ON  ST_Intersects(perceel.geom, buurt.geom)
@@ -173,7 +173,7 @@ GROUP BY buurt.naam
 
 CREATE VIEW IF NOT EXISTS wijk_eindscore AS
 SELECT  wijk.*,
-        ROUND(SUM(ST_Area(perceel) * eind.score) / SUM(ST_Area(perceel)), 3) as gemiddelde_eindscore
+        ROUND(SUM(ST_Area(perceel.geom) * eind.score) / SUM(ST_Area(perceel.geom)), 3) as gemiddelde_eindscore
 FROM    wijk
 LEFT JOIN perceel
     ON  ST_Intersects(perceel.geom, wijk.geom)

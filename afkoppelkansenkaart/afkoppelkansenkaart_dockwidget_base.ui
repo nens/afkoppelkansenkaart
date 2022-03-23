@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>446</width>
-    <height>903</height>
+    <height>801</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -44,7 +44,7 @@
          <x>0</x>
          <y>0</y>
          <width>424</width>
-         <height>855</height>
+         <height>753</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -75,6 +75,58 @@
          </widget>
         </item>
         <item>
+         <widget class="QGroupBox" name="groupBox_Afkoppelkansenkaart">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>175</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>175</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(170, 255, 255);</string>
+          </property>
+          <property name="title">
+           <string>Afkoppelkansenkaart</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QPushButton" name="pushButton_Nieuw">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(170, 255, 255);
+color: rgb(0, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>Nieuw...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_Open">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(170, 255, 255);
+color: rgb(0, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>Open...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBox_Invoer">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -85,7 +137,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>210</height>
+            <height>68</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -98,11 +150,17 @@
            <string notr="true">color: rgb(170, 255, 255);</string>
           </property>
           <property name="title">
-           <string>Invoer</string>
+           <string>Externe data</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
             <widget class="QPushButton" name="pushButton_PercelenWFS">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(170, 255, 255);
 color: rgb(0, 0, 0);</string>
@@ -126,11 +184,11 @@ color: rgb(0, 0, 0);</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>80</height>
+            <height>60</height>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;color: rgb(170, 255, 255)}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}</string>
+           <string notr="true">QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;color: rgb(170, 255, 255)}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}</string>
           </property>
           <property name="title">
            <string>PostGIS Database</string>
@@ -142,23 +200,16 @@ color: rgb(0, 0, 0);</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>20</y>
-             <width>357</width>
-             <height>61</height>
+             <y>30</y>
+             <width>381</width>
+             <height>22</height>
             </rect>
            </property>
-           <layout class="QFormLayout" name="formLayout_2">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 255, 255);</string>
-              </property>
-              <property name="text">
-               <string>Database:</string>
-              </property>
-             </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QComboBox" name="comboBox_PostGISDatabases"/>
             </item>
-            <item row="1" column="1">
+            <item>
              <widget class="QLabel" name="label_StatusValue">
               <property name="styleSheet">
                <string notr="true">color: rgb(170, 255, 255);</string>
@@ -167,9 +218,6 @@ color: rgb(0, 0, 0);</string>
                <string/>
               </property>
              </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_PostGISDatabases"/>
             </item>
            </layout>
           </widget>
@@ -199,138 +247,36 @@ color: rgb(0, 0, 0);</string>
            <string notr="true">color: rgb(170, 255, 255);</string>
           </property>
           <property name="title">
-           <string>Upload naar PostGIS</string>
+           <string>Bewerkingen</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QPushButton" name="pushButton_PercelenNaarPG">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 255, 255);;color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>Percelen naar PostGIS</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_Diameters">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>175</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>175</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 0, 0);</string>
-          </property>
-          <property name="title">
-           <string/>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <widget class="QLabel" name="label_DesignEvent">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(170, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Choose a design rainfall event:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_DesignRain">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgba(140, 255, 230, 100);</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_PeakIntensity">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(170, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Peak intensity [mm/5min]:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="lineEdit_PeakIntensity">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgba(140, 255, 230, 100);</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_ComputeDiameters">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 255, 255);;color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>Compute diameters</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_Depths">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>75</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>75</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 0, 0);</string>
-          </property>
-          <property name="title">
-           <string/>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <item>
-            <widget class="QPushButton" name="pushButton_ComputeDepths">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 255, 255);;color: rgb(0, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>Compute depths</string>
-             </property>
-            </widget>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0">
+              <widget class="QComboBox" name="comboBox_Bewerkingen"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="pushButton_Play">
+               <property name="maximumSize">
+                <size>
+                 <width>30</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(170, 255, 255);;color: rgb(0, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>▶</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
