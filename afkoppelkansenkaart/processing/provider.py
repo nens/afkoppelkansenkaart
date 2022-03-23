@@ -1,11 +1,13 @@
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 from afkoppelkansenkaart.processing.height_estimation_algorithm import HeightEstimatorAlgorithm
+from afkoppelkansenkaart.processing.parcels_to_postgis import Parcels2PostGISAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms for 3Di"""
 
     def loadAlgorithms(self, *args, **kwargs):
+        self.addAlgorithm(Parcels2PostGISAlgorithm())
         self.addAlgorithm(HeightEstimatorAlgorithm())
        
     def id(self, *args, **kwargs):

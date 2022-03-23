@@ -83,6 +83,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.pushButton_Play.clicked.connect(self.play_clicked)
         self.populate_combobox_bewerkingen(provider.algorithms())
         self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
+        self.pushButton_reload.clicked.connect(self.reload_db)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
@@ -223,15 +224,23 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         params = {}  # A dictionary to load some default value in the dialog
         processing.execAlgorithmDialog(f'Afkoppelkansenkaart:{algo_name}', params)
         
+    def reload_db(self):
+        iface.messageBar().pushMessage(
+            MESSAGE_CATEGORY,
+            f"Reload DB",
+            level=Qgis.Info,
+            duration=10)
+
         # self.import_parcels_wfs_to_postgis()
         # self.subdivide_parcels()
-        # postgis_parcel_source_layer = self.get_postgis_layer(
-        #     'kadastraal_perceel_subdivided',
-        #     qgis_layer_name = "Perceel (PostGIS)"
-        # )
-        # self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
-        # # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
-        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
+            
+        postgis_parcel_source_layer = self.get_postgis_layer(
+             'kadastraal_perceel_subdivided',
+             qgis_layer_name = "Perceel (PostGIS)"
+        )
+        self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
+        # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
+        self.add_to_layer_tree_group(postgis_parcel_source_layer)
 
     @staticmethod
     def get_pscycopg_connection_params(connection_name: str):
