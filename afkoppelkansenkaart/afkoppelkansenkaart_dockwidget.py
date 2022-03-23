@@ -154,7 +154,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def populate_combobox_bewerkingen(self, algos):
         for i, algo in enumerate(algos):
-            self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.name()}')
+            self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.name()}', algo)
             
         self.update_bewerking(0)
 
@@ -216,6 +216,8 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             f"Start algoritme: ({self.comboBox_Bewerkingen.currentText()})",
             level=Qgis.Info,
             duration=10)
+            
+        # self.trext
         
         # self.import_parcels_wfs_to_postgis()
         # self.subdivide_parcels()
@@ -269,14 +271,14 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         else:
             self.label_StatusValue.setText('Invalid connection details')
             
-    def update_bewerking(self, text):
+    def update_bewerking(self, idx):
         iface.messageBar().pushMessage(
             MESSAGE_CATEGORY,
-            f"Gelesteerd algoritme: ({text})",
+            f"Gelesteerd algoritme: ({idx})",
             level=Qgis.Info,
             duration=10)
-        
-        
+        self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())
+        #self.textField_Uitleg.setPlainText(f'Uitl3eg over {idx}')
 
     def import_parcels_wfs_to_postgis(self):
         if self.parcel_layer_id:

@@ -140,10 +140,7 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
 
-        help_string = """
-        Calculate height
-        Output: Polygon layer indicating the median height of the input dem in the polygon region
-        """
+        help_string = "Hoogtebepaling op basis van percelen"
 
         return self.tr(help_string)
 
