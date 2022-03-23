@@ -24,10 +24,13 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsApplication
 # Initialize Qt resources from file resources.py
 from .resources import *
 from .constants import *
+
+# Import processing provider
+from afkoppelkansenkaart.processing.provider import AfkoppelKansenKaartProvider
 
 # Import the code for the DockWidget
 from .afkoppelkansenkaart_dockwidget import AfkoppelKansenKaartDockWidget
@@ -72,6 +75,9 @@ class AfkoppelKansenKaart:
 
         self.pluginIsActive = False
         self.dockwidget = None
+
+        # Processing Toolbox scripts
+        self.provider = None
 
 
     # noinspection PyMethodMayBeStatic
@@ -163,6 +169,11 @@ class AfkoppelKansenKaart:
 
         return action
 
+    def initProcessing(self):
+        """Create the Qgis Processing Toolbox provider and its algorithms"""
+        self.provider = AfkoppelKansenKaartProvider()
+        # Disabled until threedidepth is fixed
+        QgsApplication.processingRegistry().addProvider(self.provider)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -173,6 +184,9 @@ class AfkoppelKansenKaart:
             text=self.tr(u'AfkoppelKansenKaart'),
             callback=self.run,
             parent=self.iface.mainWindow())
+
+        # taken from 3DiToolbox plugin
+        self.initProcessing()
 
     #--------------------------------------------------------------------------
 
@@ -193,6 +207,8 @@ class AfkoppelKansenKaart:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        # self.unload_state_sync()
+        QgsApplication.processingRegistry().removeProvider(self.provider)
 
         for action in self.actions:
             self.iface.removePluginMenu(
