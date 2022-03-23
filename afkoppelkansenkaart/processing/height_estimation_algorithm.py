@@ -40,7 +40,7 @@ from qgis.core import QgsProcessingParameterFeatureSource
 from qgis.core import QgsProviderConnectionException
 from qgis.core import QgsProviderRegistry
 from qgis.core import QgsProcessingParameterVectorLayer
-from qgis.core import QgsProcessingParameterBoolean
+from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 
 from typing import List
@@ -69,8 +69,8 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(self.INPUT_POL, self.tr("Perceel polygon"), [QgsProcessing.TypeVectorPolygon] )
         )
         
-        self.addParameter(
-            QgsProcessingParameterBoolean(
+        self.addOutput(
+            QgsProcessingOutputBoolean(
                 self.OUTPUT,
                 self.tr('Success')
             )
