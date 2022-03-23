@@ -127,16 +127,16 @@ class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
         return {self.OUTPUT: success}
 
     def name(self):
-        return "HeightEstimator"
+        return "heightestimator"
 
     def displayName(self):
         return self.tr("Height estimator")
 
     def group(self):
-        return self.tr("Afkoppelrendement")
+        return self.tr("afkoppelkanskaart")
 
     def groupId(self):
-        return "afkoppelrendement"
+        return "afkoppelkanskaart"
 
     def shortHelpString(self):
 
