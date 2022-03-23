@@ -182,37 +182,3 @@ JOIN	all_ids_and_geoms AS nw
 CREATE INDEX ON kadastraal_perceel_subdivided USING gist(geom);
 ALTER TABLE kadastraal_perceel_subdivided ADD PRIMARY KEY (id);
 
-/*
-ALTER TABLE percelen_geknipt ADD COLUMN geom_geenpand geometry(MultiPolygon, 28992);
-
-update percelen_geknipt set geom_geenpand = NULL;
-with panden_selectie AS (
-	SELECT pand.* FROM panden_kernen_polygon pand, percelen_geknipt perc
-	WHERE ST_Intersects(perc.geom, pand.geom)
-), 
-perc_zonder_pand AS (
-	SELECT 	perc.uid, 
-		(ST_Dump(ST_Difference(perc.geom, ST_Union(pand.geom)))).geom AS geom
-	FROM	panden_selectie AS pand
-	JOIN 	percelen_geknipt AS perc
-	ON 	ST_Intersects(pand.geom, perc.geom)
-			--WHERE perc.uid < 10
-	GROUP BY perc.uid, perc.geom
-),
-filtered AS (
-	SELECT uid, ST_Collect(geom) AS geom 
-	FROM perc_zonder_pand 
-	WHERE ST_GeometryType(geom) = 'ST_Polygon'
-	GROUP BY uid
-)
-UPDATE	percelen_geknipt AS pt
-SET 	geom_geenpand = pzp.geom
-FROM 	filtered AS pzp
-WHERE 	pt.uid = pzp.uid
-;
-
-UPDATE percelen_geknipt 
-SET geom_geenpand = ST_Multi(geom)
-WHERE geom_geenpand IS NULL
-; 
-*/

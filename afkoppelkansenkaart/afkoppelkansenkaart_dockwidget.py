@@ -208,11 +208,13 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def percelen_naar_pg_clicked(self):
         self.import_parcels_wfs_to_postgis()
         self.subdivide_parcels()
-        postgis_parcel_source_layer = self.get_postgis_layer('kadastraal_perceel_subdivided')
+        postgis_parcel_source_layer = self.get_postgis_layer(
+            'kadastraal_perceel_subdivided',
+            qgis_layer_name = "Perceel (PostGIS)"
+        )
         self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
-        self.import_subdivided_parcels_to_akk()
 
     @staticmethod
     def get_pscycopg_connection_params(connection_name: str):
