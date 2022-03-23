@@ -154,7 +154,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def populate_combobox_bewerkingen(self, algos):
         for i, algo in enumerate(algos):
-            self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.name()}', algo)
+            self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.displayName()}', algo)
             
         self.update_bewerking(0)
 
@@ -211,15 +211,17 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def play_clicked(self):
         # Run the selected Processor
-        iface.messageBar().pushMessage(
-            MESSAGE_CATEGORY,
-            f"Start algoritme: ({self.comboBox_Bewerkingen.currentText()})",
-            level=Qgis.Info,
-            duration=10)
             
         algo_name = self.comboBox_Bewerkingen.currentData().name()
+        
+        iface.messageBar().pushMessage(
+            MESSAGE_CATEGORY,
+            f"Start algoritme: ({algo_name})",
+            level=Qgis.Info,
+            duration=10)
+        
         params = {}  # A dictionary to load some default value in the dialog
-        processing.execAlgorithmDialog(f'Afkoppelkansenkaart:{algo_name}', {})
+        processing.execAlgorithmDialog(f'Afkoppelkansenkaart:{algo_name}', params)
         
         # self.import_parcels_wfs_to_postgis()
         # self.subdivide_parcels()
