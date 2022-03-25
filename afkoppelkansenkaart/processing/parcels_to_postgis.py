@@ -38,7 +38,7 @@ from qgis.core import QgsProcessingParameterFeatureSink
 from qgis.core import QgsProcessingParameterFileDestination
 from qgis.core import QgsProcessingParameterRasterLayer
 from qgis.core import QgsProcessingParameterFeatureSource
-from qgis.core import QgsProviderConnectionException
+from qgis.core import QgsProcessingParameterMapLayer
 from qgis.core import QgsProject
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingException
@@ -46,11 +46,13 @@ from qgis.core import QgsProcessingOutputBoolean
 from qgis.core import QgsProcessingFeedback
 from qgis.core import QgsDataSourceUri
 from qgis.core import QgsVectorLayer
+from qgis.core import QgsAuthMethodConfig
+from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.utils import iface
-from qgis.PyQt.QtWidgets import QProgressBar
 import psycopg2
 from ..constants import *
+from qgis.PyQt.QtCore import QSettings
 
 from typing import List
 
@@ -71,7 +73,7 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         """
         
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_POL, self.tr("Perceel polygon"), [QgsProcessing.TypeVectorPolygon] )
+            QgsProcessingParameterMapLayer(self.INPUT_POL, self.tr("Perceel polygon"))
         )
 
         self.addParameter(
@@ -89,33 +91,37 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
- 
-        iface.messageBar().pushMessage(
-            MESSAGE_CATEGORY,
-            "Start inladen percelen",
-            level=Qgis.Success,
-            duration=3
-        )
+        feedback.pushInfo(f"Start algo")
 
         connection_name = self.parameterAsConnectionName(
             parameters, self.INPUT_DB, context
         )
 
-        input_pol_source = self.parameterAsSource(
+        input_pol_source = self.parameterAsLayer(
             parameters,
             self.INPUT_POL,
             context
         )
 
+        success = False
+    
         if input_pol_source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_POL))
 
-        self.import_parcels_wfs_to_postgis(connection_name)
-        self.subdivide_parcels(connection_name)
+        feedback.pushInfo(f"Start import naar PostGIS in {connection_name}")
+
+        self.import_parcels_wfs_to_postgis(connection_name, feedback, parameters, input_pol_source.id(), context)
+
+        feedback.pushInfo(f"Percelen ingeladen")
+
+        self.subdivide_parcels(connection_name, feedback)
         
+        feedback.pushInfo(f"Percelen onderverdeeld")
+
         postgis_parcel_source_layer = self.get_postgis_layer(
+            connection_name,
             'kadastraal_perceel_subdivided',
-            qgis_layer_name = "perceel"
+            qgis_layer_name = "Perceel (PostGIS)"
         )
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
@@ -154,8 +160,12 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         project.addMapLayer(layer, addToLegend=False)
         self.layer_group.insertLayer(0, layer)
 
-    def import_parcels_wfs_to_postgis(self, connection_name:str):
-        feature_source = QgsProcessingFeatureSourceDefinition(source=self.INPUT_POL, selectedFeaturesOnly=True)
+    def import_parcels_wfs_to_postgis(self, connection_name:str, feedback, parameters, feature_source_id, context):
+        feature_source = QgsProcessingFeatureSourceDefinition(source=feature_source_id, selectedFeaturesOnly=True)
+
+        # numfeatures = feature_source.featureCount()    
+        # feedback.pushInfo(f"Start importeren {numfeatures} percelen naar PostGIS in {connection_name}")
+
         params = {
             'INPUT': feature_source,
             'DATABASE': connection_name,
@@ -170,45 +180,16 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
             'DROP_STRING_LENGTH': True,
             'FORCE_SINGLEPART': False
         }
-        # Progress bar
-        iface.messageBar().clearWidgets()
-        progress_message_bar = iface.messageBar()
-        # progress_message_bar.createMessage('Import to PostGIS')
-        progressbar = QProgressBar()
-        progress_message_bar.pushWidget(progressbar)
 
-        # Processing feedback
-        def progress_changed(progress):
-            progressbar.setValue(progress)
+        processing.run("qgis:importintopostgis", params, context=context, feedback=feedback)
 
-        feedback = QgsProcessingFeedback()
-        feedback.progressChanged.connect(progress_changed)
-        processing.runAndLoadResults("qgis:importintopostgis", params, feedback=feedback)
-        iface.messageBar().clearWidgets()
-        iface.messageBar().pushMessage(
-            MESSAGE_CATEGORY,
-            "Percelen ingeladen in PostGIS database",
-            level=Qgis.Success,
-            duration=3
-        )
-        # context = QgsProcessingContext()
-        # feedback = QgsProcessingFeedback()
-        # alg = QgsApplication.instance().processingRegistry().algorithmById('native:importintopostgis')
-        # task = QgsProcessingAlgRunnerTask(alg, params, context, feedback)
-        # # task.executed.connect(partial(task_finished, context))
-        # QgsApplication.taskManager().addTask(task)
-
-    def subdivide_parcels(self, connection_name:str):
+    def subdivide_parcels(self, connection_name:str, feedback):
         try:
             conn = psycopg2.connect(**self.get_pscycopg_connection_params(connection_name))
         except psycopg2.OperationalError:
-            iface.messageBar().pushMessage(
-                MESSAGE_CATEGORY,
-                "Kan geen verbinding maken met de database",
-                level=Qgis.Warning,
-                duration=3
-            )
+            feedback.reportError("Kan geen verbinding maken met de database", True)
             return
+
         cursor = conn.cursor()
         sql_file_name = os.path.join(SQL_DIR, 'subdivide_parcels.sql')
         with open(sql_file_name, 'r') as sql_file:
@@ -217,11 +198,11 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         conn.commit()
         conn.close()
     
-    def get_postgis_layer(self, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
+    def get_postgis_layer(self, connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
         if not qgis_layer_name:
             qgis_layer_name = pg_layer_name
         uri = QgsDataSourceUri()
-        params = self.get_pscycopg_connection_params(self.connection_name)
+        params = self.get_pscycopg_connection_params(connection_name)
         uri.setConnection(
             aHost=params['host'],
             aPort=params['port'],
@@ -238,6 +219,14 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")
         return layer
 
+    @property
+    def layer_group(self):
+        root = QgsProject.instance().layerTreeRoot()
+        _layer_group = root.findGroup('Afkoppelkansenkaart')
+        if not _layer_group:
+            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
+        return _layer_group
+
     def add_to_layer_tree_group(self, layer):
         """
         Add a layer to the layer tree group
@@ -245,3 +234,24 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         project = QgsProject.instance()
         project.addMapLayer(layer, addToLegend=False)
         self.layer_group.insertLayer(0, layer)
+
+    @staticmethod
+    def get_pscycopg_connection_params(connection_name: str):
+        s = QSettings()
+        s.beginGroup(f"PostgreSQL/connections/{connection_name}")
+        result = {
+            'host': s.value('host'),
+            'port': s.value('port'),
+            'user': s.value('username'),
+            'password': s.value('password'),
+            'dbname': s.value('database'),
+        }
+        if result['password'] == '':
+            authcfg = s.value('authcfg')
+            auth_mgr = QgsApplication.authManager()
+            auth_method_config = QgsAuthMethodConfig()
+            auth_mgr.loadAuthenticationConfig(authcfg, auth_method_config, True)
+            config_map = auth_method_config.configMap()
+            result['user'] = config_map['username']
+            result['password'] = config_map['password']
+        return result
