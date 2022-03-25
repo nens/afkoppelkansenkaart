@@ -121,7 +121,7 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         postgis_parcel_source_layer = self.get_postgis_layer(
             connection_name,
             'kadastraal_perceel_subdivided',
-            qgis_layer_name = "Perceel (PostGIS)"
+            qgis_layer_name = "Perceel"
         )
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
@@ -162,9 +162,6 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
 
     def import_parcels_wfs_to_postgis(self, connection_name:str, feedback, parameters, feature_source_id, context):
         feature_source = QgsProcessingFeatureSourceDefinition(source=feature_source_id, selectedFeaturesOnly=True)
-
-        # numfeatures = feature_source.featureCount()    
-        # feedback.pushInfo(f"Start importeren {numfeatures} percelen naar PostGIS in {connection_name}")
 
         params = {
             'INPUT': feature_source,
