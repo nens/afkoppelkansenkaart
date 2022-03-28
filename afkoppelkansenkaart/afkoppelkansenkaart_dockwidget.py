@@ -37,10 +37,6 @@ from qgis.core import (
     QgsFields,
     QgsProject,
     QgsVectorLayer,
-    QgsRasterLayer,
-    QgsMapLayerProxyModel,
-    QgsProcessingAlgRunnerTask,
-    QgsProcessingContext,
     QgsProcessingFeatureSourceDefinition,
     QgsProcessingFeedback,
     QgsApplication,
@@ -75,6 +71,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.db = None
 
         self.setupUi(self)
+        
         self.pushButton_Nieuw.clicked.connect(self.nieuw_clicked)
         self.pushButton_Open.clicked.connect(self.open_clicked)
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
@@ -84,6 +81,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.populate_combobox_bewerkingen(provider.algorithms())
         self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
         self.pushButton_reload.clicked.connect(self.reload_db)
+        self.toggle_ui(False)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
@@ -162,6 +160,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def nieuw_clicked(self):
         filename, _ = QFileDialog.getSaveFileName(self, "Nieuwe afkoppelkansenkaart", "", "GeoPackage (*.gpkg)")
         if filename:
+            self.toggle_ui(False)
             iface.messageBar().pushMessage(
                 MESSAGE_CATEGORY,
                 f"Afkoppelkansenkaart geopackage aangemaakt! ({filename})",
@@ -175,6 +174,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self.db.initialise()
             self.db.create_pivot_view()
             self.add_afkoppelkansenkaart_layer()
+            self.toggle_ui(True)
 
     def open_clicked(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Nieuwe afkoppelkansenkaart", "", "GeoPackage (*.gpkg)")
@@ -188,6 +188,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
                         duration=10
                     )
                     return
+            self.toggle_ui(False)
             self.db = AfkoppelKansenKaartDatabase()
             self.db.set_datasource(filename)
             iface.messageBar().pushMessage(
@@ -197,6 +198,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
                 duration=10
             )
             self.add_afkoppelkansenkaart_layer()
+            self.toggle_ui(True)
 
     def add_afkoppelkansenkaart_layer(self):
         if self.db.gpkg_path:
@@ -291,7 +293,9 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             level=Qgis.Info,
             duration=10)
         self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())
-        #self.textField_Uitleg.setPlainText(f'Uitl3eg over {idx}')
+
+    def toggle_ui(self, active):
+        self.groupBox_ConnectedSurfaces.setEnabled(active)
 
     def import_parcels_wfs_to_postgis(self):
         if self.parcel_layer_id:
