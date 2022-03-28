@@ -121,14 +121,14 @@ class Inloop2PostGISAlgorithm(QgsProcessingAlgorithm):
         return Inloop2PostGISAlgorithm()
     
     def import_parcels_wfs_to_postgis(self, connection_name:str, feedback, parameters, feature_source_id, context):
-        feature_source = QgsProcessingFeatureSourceDefinition(source=feature_source_id, selectedFeaturesOnly=True)
+        feature_source = QgsProcessingFeatureSourceDefinition(source=feature_source_id, selectedFeaturesOnly=False)
 
         params = {
             'INPUT': feature_source,
             'DATABASE': connection_name,
             'SCHEMA': 'public',
             'TABLENAME': 'bgt_inlooptabel',
-            'PRIMARY_KEY': 'id',
+            'PRIMARY_KEY': 'fid',
             'GEOMETRY_COLUMN': 'geom',
             'ENCODING': 'UTF-8',
             'OVERWRITE': True,
