@@ -45,6 +45,8 @@ from qgis.core import (
 )
 from qgis.utils import iface
 import processing
+from database import get_pscycopg_connection_params
+from database import get_postgis_layer
 
 import psycopg2
 
@@ -81,7 +83,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.populate_combobox_bewerkingen(provider.algorithms())
         self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
         self.pushButton_reload.clicked.connect(self.reload_db)
-        self.toggle_ui(False)
+        self.toggle_ui(True)
 
     def closeEvent(self,event):
         self.closingPlugin.emit()
@@ -126,26 +128,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         s.endGroup()
         return result
 
-    def get_postgis_layer(self, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
-        if not qgis_layer_name:
-            qgis_layer_name = pg_layer_name
-        uri = QgsDataSourceUri()
-        params = self.get_pscycopg_connection_params(self.connection_name)
-        uri.setConnection(
-            aHost=params['host'],
-            aPort=params['port'],
-            aDatabase=params['dbname'],
-            aUsername=params['user'],
-            aPassword=params['password']
-        )
-        uri.setDataSource(
-            aSchema='public',
-            aTable=pg_layer_name,
-            aGeometryColumn=geometry_column_name
-        )
 
-        layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")
-        return layer
 
     def populate_combobox_postgis_databases(self):
         self.comboBox_PostGISDatabases.clear()
@@ -236,34 +219,14 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         # self.import_parcels_wfs_to_postgis()
         # self.subdivide_parcels()
             
-        postgis_parcel_source_layer = self.get_postgis_layer(
+        postgis_parcel_source_layer = get_postgis_layer(
+            self.connection_name,
              'kadastraal_perceel_subdivided',
              qgis_layer_name = "Perceel (PostGIS)"
         )
         self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
-
-    @staticmethod
-    def get_pscycopg_connection_params(connection_name: str):
-        s = QSettings()
-        s.beginGroup(f"PostgreSQL/connections/{connection_name}")
-        result = {
-            'host': s.value('host'),
-            'port': s.value('port'),
-            'user': s.value('username'),
-            'password': s.value('password'),
-            'dbname': s.value('database'),
-        }
-        if result['password'] == '':
-            authcfg = s.value('authcfg')
-            auth_mgr = QgsApplication.authManager()
-            auth_method_config = QgsAuthMethodConfig()
-            auth_mgr.loadAuthenticationConfig(authcfg, auth_method_config, True)
-            config_map = auth_method_config.configMap()
-            result['user'] = config_map['username']
-            result['password'] = config_map['password']
-        return result
 
     def add_parcel_wfs(self):
         if self.parcel_layer_id:
@@ -274,7 +237,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def postgis_connection_is_valid(self):
         try:
-            conn = psycopg2.connect(**self.get_pscycopg_connection_params(self.connection_name))
+            conn = psycopg2.connect(**get_pscycopg_connection_params(self.connection_name))
         except psycopg2.OperationalError:
             return False
         conn.close()
@@ -352,7 +315,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def subdivide_parcels(self):
         try:
-            conn = psycopg2.connect(**self.get_pscycopg_connection_params(self.connection_name))
+            conn = psycopg2.connect(**get_pscycopg_connection_params(self.connection_name))
         except psycopg2.OperationalError:
             iface.messageBar().pushMessage(
                 MESSAGE_CATEGORY,

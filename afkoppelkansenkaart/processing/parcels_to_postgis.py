@@ -30,29 +30,20 @@ __copyright__ = "(C) 2021 by Nelen en Schuurmans"
 __revision__ = "$Format:%H$"
 
 from qgis import processing
-from qgis.core import Qgis
-from qgis.core import QgsProcessing
 from qgis.core import QgsProcessingAlgorithm
 from qgis.core import QgsProcessingFeatureSourceDefinition
-from qgis.core import QgsProcessingParameterFeatureSink
-from qgis.core import QgsProcessingParameterFileDestination
-from qgis.core import QgsProcessingParameterRasterLayer
-from qgis.core import QgsProcessingParameterFeatureSource
 from qgis.core import QgsProcessingParameterMapLayer
 from qgis.core import QgsProject
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingException
 from qgis.core import QgsProcessingOutputBoolean
-from qgis.core import QgsProcessingFeedback
 from qgis.core import QgsDataSourceUri
 from qgis.core import QgsVectorLayer
-from qgis.core import QgsAuthMethodConfig
-from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.utils import iface
 import psycopg2
 from ..constants import *
-from qgis.PyQt.QtCore import QSettings
+from ..database import get_pscycopg_connection_params
+from ..database import get_postgis_layer
 
 from typing import List
 
@@ -118,7 +109,7 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         
         feedback.pushInfo(f"Percelen onderverdeeld")
 
-        postgis_parcel_source_layer = self.get_postgis_layer(
+        postgis_parcel_source_layer = get_postgis_layer(
             connection_name,
             'kadastraal_perceel_subdivided',
             qgis_layer_name = "Perceel"
@@ -182,7 +173,7 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
 
     def subdivide_parcels(self, connection_name:str, feedback):
         try:
-            conn = psycopg2.connect(**self.get_pscycopg_connection_params(connection_name))
+            conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
         except psycopg2.OperationalError:
             feedback.reportError("Kan geen verbinding maken met de database", True)
             return
@@ -195,27 +186,6 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         conn.commit()
         conn.close()
     
-    def get_postgis_layer(self, connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
-        if not qgis_layer_name:
-            qgis_layer_name = pg_layer_name
-        uri = QgsDataSourceUri()
-        params = self.get_pscycopg_connection_params(connection_name)
-        uri.setConnection(
-            aHost=params['host'],
-            aPort=params['port'],
-            aDatabase=params['dbname'],
-            aUsername=params['user'],
-            aPassword=params['password']
-        )
-        uri.setDataSource(
-            aSchema='public',
-            aTable=pg_layer_name,
-            aGeometryColumn=geometry_column_name
-        )
-
-        layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")
-        return layer
-
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
@@ -231,24 +201,3 @@ class Parcels2PostGISAlgorithm(QgsProcessingAlgorithm):
         project = QgsProject.instance()
         project.addMapLayer(layer, addToLegend=False)
         self.layer_group.insertLayer(0, layer)
-
-    @staticmethod
-    def get_pscycopg_connection_params(connection_name: str):
-        s = QSettings()
-        s.beginGroup(f"PostgreSQL/connections/{connection_name}")
-        result = {
-            'host': s.value('host'),
-            'port': s.value('port'),
-            'user': s.value('username'),
-            'password': s.value('password'),
-            'dbname': s.value('database'),
-        }
-        if result['password'] == '':
-            authcfg = s.value('authcfg')
-            auth_mgr = QgsApplication.authManager()
-            auth_method_config = QgsAuthMethodConfig()
-            auth_mgr.loadAuthenticationConfig(authcfg, auth_method_config, True)
-            config_map = auth_method_config.configMap()
-            result['user'] = config_map['username']
-            result['password'] = config_map['password']
-        return result
