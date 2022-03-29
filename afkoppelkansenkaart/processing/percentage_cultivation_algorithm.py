@@ -29,7 +29,6 @@ __copyright__ = "(C) 2021 by Nelen en Schuurmans"
 
 __revision__ = "$Format:%H$"
 
-from qgis.core import QgsProcessingAlgorithm
 from qgis.core import QgsProject
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingOutputBoolean
@@ -37,9 +36,9 @@ from qgis.PyQt.QtCore import QCoreApplication
 import psycopg2
 from ..constants import *
 from ..database import get_pscycopg_connection_params
-from ..database import get_postgis_layer
+from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
-class PercentageCultivationAlgorithm(QgsProcessingAlgorithm):
+class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when

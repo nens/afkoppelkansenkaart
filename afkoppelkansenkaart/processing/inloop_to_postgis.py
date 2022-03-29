@@ -30,16 +30,16 @@ __copyright__ = "(C) 2021 by Nelen en Schuurmans"
 __revision__ = "$Format:%H$"
 
 from qgis import processing
-from qgis.core import QgsProcessingAlgorithm
 from qgis.core import QgsProcessingFeatureSourceDefinition
 from qgis.core import QgsProcessingParameterMapLayer
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingException
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
+from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 from ..constants import *
 
-class Inloop2PostGISAlgorithm(QgsProcessingAlgorithm):
+class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when

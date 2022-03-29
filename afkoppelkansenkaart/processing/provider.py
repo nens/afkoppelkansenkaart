@@ -10,11 +10,11 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms for 3Di"""
 
     def loadAlgorithms(self, *args, **kwargs):
-        self.addAlgorithm(Parcels2PostGISAlgorithm())
-        self.addAlgorithm(Inloop2PostGISAlgorithm())
-        self.addAlgorithm(HeightEstimatorAlgorithm())
-        self.addAlgorithm(PercentageCultivationAlgorithm())
-        self.addAlgorithm(PercentageConcretisationAlgorithm())
+        self.addAlgorithm(Parcels2PostGISAlgorithm(1))
+        self.addAlgorithm(Inloop2PostGISAlgorithm(0))
+        self.addAlgorithm(HeightEstimatorAlgorithm(4))
+        self.addAlgorithm(PercentageCultivationAlgorithm(2))
+        self.addAlgorithm(PercentageConcretisationAlgorithm(3))
        
     def id(self, *args, **kwargs):
         """The ID of your plugin, used for identifying the provider.

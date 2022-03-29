@@ -31,7 +31,7 @@ __revision__ = "$Format:%H$"
 
 from qgis import processing
 from qgis.core import QgsProcessing
-from qgis.core import QgsProcessingAlgorithm
+from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 from qgis.core import QgsProcessingException
 from qgis.core import QgsProcessingParameterFeatureSink
 from qgis.core import QgsProcessingParameterFileDestination
@@ -45,7 +45,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from typing import List
 
-class HeightEstimatorAlgorithm(QgsProcessingAlgorithm):
+class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
