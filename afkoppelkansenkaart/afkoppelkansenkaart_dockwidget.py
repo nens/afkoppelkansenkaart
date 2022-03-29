@@ -132,6 +132,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def populate_combobox_postgis_databases(self):
         self.comboBox_PostGISDatabases.clear()
+        # todo: enforce a proper functional order
         self.comboBox_PostGISDatabases.addItems(self.list_postgis_connections())
 
     def populate_combobox_bewerkingen(self, algos):
