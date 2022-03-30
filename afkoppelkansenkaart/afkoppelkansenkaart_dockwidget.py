@@ -75,6 +75,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.populate_combobox_bewerkingen(provider.algorithms())
         self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
         self.pushButton_reload.clicked.connect(self.reload_db)
+        self.pushButton_refresh.clicked.connect(self.populate_combobox_postgis_databases)
         self.check_bewerkingen_ui()
 
     def closeEvent(self,event):
@@ -121,8 +122,13 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     def populate_combobox_postgis_databases(self):
         self.comboBox_PostGISDatabases.clear()
-        # todo: enforce a proper functional order
         self.comboBox_PostGISDatabases.addItems(self.list_postgis_connections())
+        iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                f"PostGIS database lijst ververst",
+                level=Qgis.Success,
+                duration=3
+        )
 
     def populate_combobox_bewerkingen(self, algos):
         
