@@ -198,8 +198,11 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         # run the algo without dialog
 
         if algo_name is "bgtinlooptabelnaarpostgis":
-            run_silent = False
             params['INPUT_DB'] = self.connection_name
+        elif algo_name is "parceltopostgis":
+            params['INPUT_DB'] = self.connection_name
+            params['INPUT_POL'] = self.parcel_layer_id
+            run_silent = True
 
         if run_silent:  
             processing.run(algo, params)
