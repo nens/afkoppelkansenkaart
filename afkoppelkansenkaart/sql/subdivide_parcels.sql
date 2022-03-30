@@ -182,3 +182,11 @@ JOIN	all_ids_and_geoms AS nw
 CREATE INDEX ON kadastraal_perceel_subdivided USING gist(geom);
 ALTER TABLE kadastraal_perceel_subdivided ADD PRIMARY KEY (id);
 
+----- Cleaning up
+DROP TABLE IF EXISTS fishnet;
+DROP TABLE IF EXISTS rechte_percelen_selectie; 
+DROP TABLE IF EXISTS geknipte_percelen_recht;
+DROP TABLE IF EXISTS percelen_clean_teruggedraaid;
+DROP TABLE IF EXISTS kadastraal_perceel;
+
+
