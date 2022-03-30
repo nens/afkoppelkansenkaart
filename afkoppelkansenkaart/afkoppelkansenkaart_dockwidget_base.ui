@@ -242,6 +242,9 @@ color: rgb(0, 0, 0);</string>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_ConnectedSurfaces">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -261,7 +264,7 @@ color: rgb(0, 0, 0);</string>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">color: rgb(170, 255, 255);</string>
+           <string notr="true">disabled{color: gray};</string>
           </property>
           <property name="title">
            <string>Bewerkingen</string>
@@ -274,6 +277,9 @@ color: rgb(0, 0, 0);</string>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_Play">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="maximumSize">
                 <size>
                  <width>30</width>
@@ -286,7 +292,8 @@ color: rgb(0, 0, 0);</string>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: rgb(170, 255, 255);;color: rgb(0, 0, 0);</string>
+                <string notr="true">:enabled{background-color: rgb(170, 255, 255)}
+:disabled{background-color: rgb(0, 128, 128)}</string>
                </property>
                <property name="text">
                 <string>▶</string>
@@ -297,6 +304,16 @@ color: rgb(0, 0, 0);</string>
            </item>
            <item>
             <widget class="QPlainTextEdit" name="textField_Uitleg">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPlainTextEdit#textField_Uitleg.disabled{color: gray};
+QPlainTextEdit#textField_Uitleg.enabled{color: black};</string>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
              <property name="plainText">
               <string>Uitleg</string>
              </property>
