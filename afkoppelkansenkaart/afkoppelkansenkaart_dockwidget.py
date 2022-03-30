@@ -33,15 +33,8 @@ from qgis.PyQt.QtCore import pyqtSignal, QSettings
 from qgis.core import (
     NULL,
     Qgis,
-    QgsFeature,
-    QgsFields,
     QgsProject,
     QgsVectorLayer,
-    QgsProcessingFeatureSourceDefinition,
-    QgsProcessingFeedback,
-    QgsApplication,
-    QgsAuthMethodConfig,
-    QgsDataSourceUri
 )
 from qgis.utils import iface
 import processing
@@ -194,18 +187,24 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             )
 
     def play_clicked(self):
+
         # Run the selected Processor
-            
         algo_name = self.comboBox_Bewerkingen.currentData().name()
-        
-        iface.messageBar().pushMessage(
-            MESSAGE_CATEGORY,
-            f"Start algoritme: ({algo_name})",
-            level=Qgis.Info,
-            duration=10)
-        
-        params = {}  # A dictionary to load some default value in the dialog
-        processing.execAlgorithmDialog(f'Afkoppelkansenkaart:{algo_name}', params)
+        algo = f'Afkoppelkansenkaart:{algo_name}'
+        params = {}  # A dictionary to load some default value in the algo
+        run_silent = False
+
+        # in case certain data is available, prepopulate the parameters and
+        # run the algo without dialog
+
+        if algo_name is "bgtinlooptabelnaarpostgis":
+            run_silent = False
+            params['INPUT_DB'] = self.connection_name
+
+        if run_silent:  
+            processing.run(algo, params)
+        else:
+            processing.execAlgorithmDialog(algo, params)
         
     def reload_db(self):
         iface.messageBar().pushMessage(

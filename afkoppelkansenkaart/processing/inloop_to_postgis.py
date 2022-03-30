@@ -100,7 +100,7 @@ class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
         return {self.OUTPUT: success}
 
     def name(self):
-        return "bgtinlooptabelnaarpostgIS"
+        return "bgtinlooptabelnaarpostgis"
 
     def displayName(self):
         return self.tr("BGT Inlooptabel naar PostGIS")
