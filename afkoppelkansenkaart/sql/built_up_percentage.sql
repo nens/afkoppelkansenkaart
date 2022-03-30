@@ -13,4 +13,5 @@ UPDATE 	kadastraal_perceel_subdivided AS tgt
 SET 	oppervlakte_bebouwing = src.oppervlakte_bebouwing,
 		percentage_bebouwing = src.oppervlakte_bebouwing / ST_Area(tgt.geom)
 FROM 	intersection AS src
+WHERE 	src.id = tgt.id
 ;

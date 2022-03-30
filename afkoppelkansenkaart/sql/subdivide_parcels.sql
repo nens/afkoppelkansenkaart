@@ -173,7 +173,7 @@ WITH all_ids_and_geoms AS (
 SELECT 	row_number() over() AS id, 
 		ori.identificatielokaalid as brk_lokaalid, 
 		ori.perceelnummer AS brk_perceelnummer,
-        NULL::double precision AS oppervlakte_perceel,
+        ST_Area(geom) AS oppervlakte_perceel,
         NULL::text gemeentelijk_eigendom ,
         NULL::double precision oppervlakte_bebouwing ,
         NULL::double precision percentage_bebouwing ,
