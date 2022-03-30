@@ -69,7 +69,6 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self._parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_WFS_LAYER_NAME)[0].id()
         except IndexError:  # No layer of that name exists:
             self._parcel_layer_id = None
-        self._layer_group = None
         self.db = None
 
         self.setupUi(self)
@@ -106,12 +105,11 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
     @property
     def layer_group(self):
-        if not self._layer_group:
-            root = QgsProject.instance().layerTreeRoot()
-            self._layer_group = root.findGroup('Afkoppelkansenkaart')
-            if not self._layer_group:
-                self._layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
-        return self._layer_group
+        root = QgsProject.instance().layerTreeRoot()
+        result = root.findGroup('Afkoppelkansenkaart')
+        if not result:
+            result = root.insertGroup(0, 'Afkoppelkansenkaart')
+        return result
 
     def add_to_layer_tree_group(self, layer):
         """
