@@ -1,12 +1,20 @@
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 from afkoppelkansenkaart.processing.height_estimation_algorithm import HeightEstimatorAlgorithm
+from afkoppelkansenkaart.processing.parcels_to_postgis import Parcels2PostGISAlgorithm
+from afkoppelkansenkaart.processing.inloop_to_postgis import Inloop2PostGISAlgorithm
+from afkoppelkansenkaart.processing.percentage_cultivation_algorithm import PercentageCultivationAlgorithm
+from afkoppelkansenkaart.processing.percentage_concretisation_algorithm import PercentageConcretisationAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms for 3Di"""
 
     def loadAlgorithms(self, *args, **kwargs):
-        self.addAlgorithm(HeightEstimatorAlgorithm())
+        self.addAlgorithm(Parcels2PostGISAlgorithm(1))
+        self.addAlgorithm(Inloop2PostGISAlgorithm(0))
+        self.addAlgorithm(HeightEstimatorAlgorithm(4))
+        self.addAlgorithm(PercentageCultivationAlgorithm(2))
+        self.addAlgorithm(PercentageConcretisationAlgorithm(3))
        
     def id(self, *args, **kwargs):
         """The ID of your plugin, used for identifying the provider.
