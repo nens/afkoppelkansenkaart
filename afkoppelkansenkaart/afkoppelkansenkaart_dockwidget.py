@@ -217,7 +217,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         postgis_parcel_source_layer = get_postgis_layer(
             self.connection_name,
              'kadastraal_perceel_subdivided',
-             qgis_layer_name = "Perceel (PostGIS)"
+             qgis_layer_name = PARCEL_POSTGIS_LAYER_NAME
         )
         self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
@@ -248,7 +248,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def update_bewerking(self, idx):
         iface.messageBar().pushMessage(
             MESSAGE_CATEGORY,
-            f"Gelesteerd algoritme: ({idx})",
+            f"Geselecteerd algoritme: ({idx})",
             level=Qgis.Info,
             duration=10)
         self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())

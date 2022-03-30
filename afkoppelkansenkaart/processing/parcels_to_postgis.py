@@ -62,7 +62,7 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
         """
         
         self.addParameter(
-            QgsProcessingParameterMapLayer(self.INPUT_POL, self.tr("Perceel polygon"))
+            QgsProcessingParameterMapLayer(self.INPUT_POL, self.tr("Perceel polygonen"))
         )
 
         self.addParameter(
@@ -110,7 +110,7 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
         postgis_parcel_source_layer = get_postgis_layer(
             connection_name,
             'kadastraal_perceel_subdivided',
-            qgis_layer_name = "Perceel"
+            qgis_layer_name = PARCEL_POSTGIS_LAYER_NAME
         )
         # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
