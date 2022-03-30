@@ -38,6 +38,7 @@ from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 from ..constants import *
+from ..database import execute_sql_query
 
 class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
 
@@ -94,6 +95,13 @@ class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
         feedback.pushInfo(f"Start import naar PostGIS in {connection_name}")
 
         self.import_parcels_wfs_to_postgis(connection_name, feedback, parameters, input_pol_source.id(), context)
+        sql = """
+        ALTER TABLE bgt_inlooptabel ALTER COLUMN geom TYPE geometry;
+        UPDATE bgt_inlooptabel SET geom = ST_Force3D(ST_CurveToLine(geom));
+        SELECT Populate_Geometry_Columns();
+        """
+
+        execute_sql_query(connection_name, sql, feedback)
 
         success = True
         # Return the results of the algorithm. 
