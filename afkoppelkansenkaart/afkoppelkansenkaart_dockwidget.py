@@ -66,7 +66,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         super(AfkoppelKansenKaartDockWidget,self).__init__(parent)
 
         try:
-            self._parcel_layer_id = QgsProject.instance().mapLayersByName('Kadastraal perceel')[0].id()
+            self._parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_WFS_LAYER_NAME)[0].id()
         except IndexError:  # No layer of that name exists:
             self._parcel_layer_id = None
         self._layer_group = None
@@ -235,7 +235,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def add_parcel_wfs(self):
         if self.parcel_layer_id:
             QgsProject.instance().removeMapLayer(self.parcel_layer_id)
-        vlayer = QgsVectorLayer(PARCELS_WFS_URL, "Kadastraal perceel", "WFS")
+        vlayer = QgsVectorLayer(PARCELS_WFS_URL, PARCEL_WFS_LAYER_NAME, "WFS")
         self.add_to_layer_tree_group(vlayer)
         self.parcel_layer_id = vlayer.id()
 
