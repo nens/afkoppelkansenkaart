@@ -203,6 +203,20 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             params['INPUT_DB'] = self.connection_name
             params['INPUT_POL'] = self.parcel_layer_id
             run_silent = True
+        elif algo_name is "heightestimator":
+            # retrieve subdivided parcel layer
+            subdivided_parcel_layer_id = 0
+            try:
+                subdivided_parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_POSTGIS_LAYER_NAME)[0].id()
+            except IndexError:  # No layer of that name exists:
+                iface.messageBar().pushMessage(
+                    MESSAGE_CATEGORY,
+                    "Nog geen percelenkaart beschikbaar",
+                    level=Qgis.Warning,
+                    duration=3)
+                return
+
+            params['INPUT_POL'] = subdivided_parcel_layer_id
 
         if run_silent:  
             processing.run(algo, params)

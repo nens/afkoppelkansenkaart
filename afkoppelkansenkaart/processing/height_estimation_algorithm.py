@@ -130,7 +130,7 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
         return "heightestimator"
 
     def displayName(self):
-        return self.tr("Height estimator")
+        return self.tr("Hoogteligging bepalen")
 
     def group(self):
         return self.tr("afkoppelkanskaart")
