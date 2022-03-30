@@ -1,6 +1,7 @@
-ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS geom_geenpand geometry(MultiPolygon, 28992);
+ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS geom_geenpand geometry(MultiPolygonZ, 28992);
 
 UPDATE kadastraal_perceel_subdivided set geom_geenpand = NULL;
+
 WITH perc_zonder_pand AS (
 	SELECT 	perc.id, 
 			(ST_Dump(ST_Difference(perc.geom, ST_Union(pand.geom)))).geom AS geom
