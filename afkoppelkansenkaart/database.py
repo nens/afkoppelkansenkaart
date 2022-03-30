@@ -1,8 +1,10 @@
+import os
 from pathlib import Path
 from typing import Union
 
 import ogr
 import osr
+import psycopg2
 import sqlite3
 from qgis.PyQt.QtCore import QSettings
 from qgis.core import QgsAuthMethodConfig
@@ -21,6 +23,7 @@ osr.UseExceptions()
 
 class LayerDoesNotExistError(ValueError):
     pass
+
 
 def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
     if not qgis_layer_name:
@@ -43,6 +46,7 @@ def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name:
     layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")
     return layer
 
+
 def get_pscycopg_connection_params(connection_name: str):
     s = QSettings()
     s.beginGroup(f"PostgreSQL/connections/{connection_name}")
@@ -62,6 +66,36 @@ def get_pscycopg_connection_params(connection_name: str):
         result['user'] = config_map['username']
         result['password'] = config_map['password']
     return result
+
+
+def execute_sql_script(connection_name: str, sql_filename: str, feedback):
+    try:
+        conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
+    except psycopg2.OperationalError:
+        feedback.reportError("Kan geen verbinding maken met de database", True)
+        return
+
+    cursor = conn.cursor()
+    sql_file_name = os.path.join(SQL_DIR, f'{sql_filename}.sql')
+    with open(sql_file_name, 'r') as sql_file:
+        sql = sql_file.read()
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+
+
+def execute_sql_query(connection_name: str, query: str, feedback):
+    try:
+        conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
+    except psycopg2.OperationalError:
+        feedback.reportError("Kan geen verbinding maken met de database", True)
+        return
+
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+    conn.close()
+
 
 class Database:
     """

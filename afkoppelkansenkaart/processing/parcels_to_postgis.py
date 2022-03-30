@@ -41,9 +41,9 @@ import psycopg2
 from ..constants import *
 from ..database import get_pscycopg_connection_params
 from ..database import get_postgis_layer
+from ..database import execute_sql_script
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
-from typing import List
 
 class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
 
@@ -103,7 +103,7 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
 
         feedback.pushInfo(f"Percelen ingeladen")
 
-        self.subdivide_parcels(connection_name, feedback)
+        execute_sql_script(connection_name, 'subdivide_parcels', feedback)
         
         feedback.pushInfo(f"Percelen onderverdeeld")
 
@@ -169,21 +169,6 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
 
         processing.run("qgis:importintopostgis", params, context=context, feedback=feedback)
 
-    def subdivide_parcels(self, connection_name:str, feedback):
-        try:
-            conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
-        except psycopg2.OperationalError:
-            feedback.reportError("Kan geen verbinding maken met de database", True)
-            return
-
-        cursor = conn.cursor()
-        sql_file_name = os.path.join(SQL_DIR, 'subdivide_parcels.sql')
-        with open(sql_file_name, 'r') as sql_file:
-            sql = sql_file.read()
-        cursor.execute(sql)
-        conn.commit()
-        conn.close()
-    
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
@@ -192,10 +177,3 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
             _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
         return _layer_group
 
-    def add_to_layer_tree_group(self, layer):
-        """
-        Add a layer to the layer tree group
-        """
-        project = QgsProject.instance()
-        project.addMapLayer(layer, addToLegend=False)
-        self.layer_group.insertLayer(0, layer)

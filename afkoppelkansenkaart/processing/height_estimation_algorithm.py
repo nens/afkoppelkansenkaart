@@ -42,8 +42,8 @@ from qgis.core import QgsProviderRegistry
 from qgis.core import QgsProcessingParameterVectorLayer
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
+from ..database import execute_sql_script
 
-from typing import List
 
 class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
 
@@ -80,18 +80,14 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        
-        input_pol_source = self.parameterAsSource(
-            parameters,
-            self.INPUT_POL,
-            context
-        )
-
-        dem_layer = self.parameterAsRasterLayer(
-            parameters,
-            self.INPUT_DEM,
-            context
-        )
+        success = False
+        input_pol_source = self.parameterAsSource(parameters, self.INPUT_POL, context)
+        input_pol_source_layer = self.parameterAsVectorLayer(parameters, self.INPUT_POL, context)
+        target_field_idx = input_pol_source.fields().indexFromName('maaiveldhoogte')
+        if target_field_idx == -1:
+            feedback.reportError("Ongeldige percelenlaag: het veld 'maaiveldhoogte' ontbreekt", fatalError=True)
+            return {self.OUTPUT: success}
+        dem_layer = self.parameterAsRasterLayer(parameters, self.INPUT_DEM, context)
 
         if input_pol_source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_POL))
@@ -105,20 +101,44 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
             context,
         )
         
-        success = False
+
 
         if feedback.isCanceled():
             return {self.OUTPUT: success}
             
-        #zonal statistics (in place, taken from DrainLevelAlgorithm)
-        processing.run("native:zonalstatistics", { #TODO: fb postfix?
-            'INPUT_VECTOR': parameters[self.INPUT_POL],
-            'INPUT_RASTER': parameters[self.INPUT_DEM],
-            'RASTER_BAND':1,
-            'COLUMN_PREFIX':'maaiveldhoogte_',
-            'STATISTICS':[3], #MEDIAN
-            }, context=context, feedback=feedback, is_child_algorithm=True)
-            
+        #zonal statistics (the "fb" variant outputs a new layer)
+        zonal_statistics_run = processing.run(
+            "native:zonalstatisticsfb",
+            {
+                'INPUT': parameters[self.INPUT_POL],
+                'INPUT_RASTER': parameters[self.INPUT_DEM],
+                'RASTER_BAND': 1,
+                'COLUMN_PREFIX': 'maaiveldhoogte_',
+                'STATISTICS': [3],  # MEDIAN
+                'OUTPUT': 'TEMPORARY_OUTPUT'
+            },
+            context=context,
+            feedback=feedback,
+            is_child_algorithm=True
+        )
+
+        zonal_statistics = context.getMapLayer(zonal_statistics_run['OUTPUT'])
+        input_pol_source_layer.startEditing()
+        for feature in zonal_statistics.getFeatures():
+
+            if feedback.isCanceled():
+                break
+
+            source_feature = input_pol_source_layer.getFeature(feature.id())
+            feedback.pushInfo(f"maaiveldhoogte van feature {source_feature.id()} wordt nu "
+                              f"{feature.attribute('maaiveldhoogte_median')}")
+            input_pol_source_layer.changeAttributeValue(
+                feature.id(),
+                target_field_idx,
+                feature.attribute('maaiveldhoogte_median')
+            )
+        input_pol_source_layer.commitChanges()
+
         if feedback.isCanceled():
             return {self.OUTPUT: success}
         
@@ -140,7 +160,7 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
 
     def shortHelpString(self):
 
-        return self.tr("Hoogtebepaling op basis van percelen2")
+        return self.tr("Bepaal de (mediane) hoogteligging van elk perceel op basis van de opgegeven DEM.")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)

@@ -172,7 +172,24 @@ WITH all_ids_and_geoms AS (
 )
 SELECT 	row_number() over() AS id, 
 		ori.identificatielokaalid as brk_lokaalid, 
-		ori.perceelnummer AS brk_perceelnummer, 
+		ori.perceelnummer AS brk_perceelnummer,
+        oppervlakte_perceel double precision,
+        gemeentelijk_eigendom text,
+        oppervlakte_bebouwing double precision,
+        percentage_bebouwing double precision,
+        verhard_oppervlak double precision,
+        verhard_percentage double precision,
+        maaiveldhoogte double precision,
+        bodemsoort TEXT,
+        doorlatendheid_bodem double precision,
+        ghg_tov_maaiveld double precision,
+        afstand_tot_bergingslocatie double precision,
+        code_dichtsbijzijnde_rioolleiding TEXT,
+        type_rioolstelsel TEXT,
+        kwetsbaarheid_oppervlaktewater TEXT,
+        aantal_keer_verpompen INTEGER,
+        afstand_tot_rwzi TEXT,
+        type_gebied TEXT,
 		ST_Force3D(ST_Multi(nw.geom))::geometry(MultiPolygonZ, 28992) as geom
 FROM 	kadastraal_perceel AS ori
 JOIN	all_ids_and_geoms AS nw
