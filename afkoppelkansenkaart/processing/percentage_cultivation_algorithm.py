@@ -33,9 +33,8 @@ from qgis.core import QgsProject
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
-import psycopg2
+from ..database import execute_sql_script
 from ..constants import *
-from ..database import get_pscycopg_connection_params
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
 class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
@@ -74,20 +73,11 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
             parameters, self.INPUT_DB, context
         )
 
-
         success = False
     
-        self.calculate_percentage(connection_name, feedback)
+        execute_sql_script(connection_name, 'built_up_percentage', feedback)
         
         feedback.pushInfo(f"Percentage bepaald")
-
-        # postgis_parcel_source_layer = self.get_postgis_layer(
-        #     connection_name,
-        #     'kadastraal_perceel_subdivided',
-        #     qgis_layer_name = "Perceel"
-        # )
-
-        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
 
         success = True
         # Return the results of the algorithm. 
@@ -106,7 +96,6 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
         return "afkoppelkanskaart"
 
     def shortHelpString(self):
-
         return self.tr("Bepalen van percentage bebouwing")
 
     def tr(self, string):
@@ -114,43 +103,3 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
 
     def createInstance(self):
         return PercentageCultivationAlgorithm()
-    
-    def add_to_layer_tree_group(self, layer):
-        """
-        Add a layer to the Afkoppelkansenkaart layer tree group
-        """
-        project = QgsProject.instance()
-        project.addMapLayer(layer, addToLegend=False)
-        self.layer_group.insertLayer(0, layer)
-
-    def calculate_percentage(self, connection_name:str, feedback):
-        try:
-            conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
-        except psycopg2.OperationalError:
-            feedback.reportError("Kan geen verbinding maken met de database", True)
-            return
-
-        cursor = conn.cursor()
-        sql_file_name = os.path.join(SQL_DIR, 'built_up_percentage.sql')
-        with open(sql_file_name, 'r') as sql_file:
-            sql = sql_file.read()
-        cursor.execute(sql)
-        conn.commit()
-        conn.close()
-
-    @property
-    def layer_group(self):
-        root = QgsProject.instance().layerTreeRoot()
-        _layer_group = root.findGroup('Afkoppelkansenkaart')
-        if not _layer_group:
-            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
-        return _layer_group
-
-    def add_to_layer_tree_group(self, layer):
-        """
-        Add a layer to the layer tree group
-        """
-        project = QgsProject.instance()
-        project.addMapLayer(layer, addToLegend=False)
-        self.layer_group.insertLayer(0, layer)
-
