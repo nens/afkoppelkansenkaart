@@ -100,10 +100,12 @@ VALUES  (1,'Nagenoeg volledig onverhard',   1,0,25,3),
 INSERT INTO score_zoektabel (criterium_id, omschrijving, code, score)
 VALUES  (6,'Gemengd',                       1,3),
         (6,'Verbeterd gemengd',             2,2),
-        (6,'RWA verbeterd gescheiden',      3,1),
-        (6,'RWA gescheiden',                4,1),
-        (6,'RWA naar bodem of infiltratievoorziening',5,0),
-        (6,'Afwatering op maaiveld',        6,0),
+        (6,'Verbeterd gescheiden RWA/DWA',  3,1),
+        (6,'Gescheiden RWA/DWA',            4,1),
+        (6,'Infiltratievoorziening (RWA-IT/DWA)', 5,0),
+        (6,'Maaiveld',                      6,0),
+        (6,'Open water',                    7,0),
+        (6,'Gescheiden RWA/Gemengd',        8,2)
 
         (9,'T=1/6',                         1,1),
         (9,'T=2',                           2,2),
