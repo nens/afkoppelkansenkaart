@@ -7,6 +7,7 @@ from afkoppelkansenkaart.processing.percentage_cultivation_algorithm import Perc
 from afkoppelkansenkaart.processing.percentage_concretisation_algorithm import PercentageConcretisationAlgorithm
 from afkoppelkansenkaart.processing.potential_storage_locations_algorithm import PotentialStorageLocationAlgorithm
 from afkoppelkansenkaart.processing.parcels_to_geopackage import Parcels2GeoPackageAlgorithm
+from afkoppelkansenkaart.processing.distance_to_storage_location_algorithm import DistanceToStorageLocationAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms for 3Di"""
@@ -19,6 +20,7 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
         self.addAlgorithm(PercentageConcretisationAlgorithm(3))
         self.addAlgorithm(Parcels2GeoPackageAlgorithm(5))
         self.addAlgorithm(PotentialStorageLocationAlgorithm(6))
+        self.addAlgorithm(DistanceToStorageLocationAlgorithm(7))
        
     def id(self, *args, **kwargs):
         """The ID of your plugin, used for identifying the provider.

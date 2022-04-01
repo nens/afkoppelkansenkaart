@@ -157,6 +157,9 @@ class Parcels2GeoPackageAlgorithm(OrderedProcessingAlgorithm):
         # if _writer:
         #     print(postgis_parcel_source_layer.name(), _writer)
 
+        # look at https://gis.stackexchange.com/questions/109078/how-to-delete-column-field-in-pyqgis
+        
+
         success = True
         # Return the results of the algorithm. 
         return {self.OUTPUT: success}
