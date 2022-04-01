@@ -190,7 +190,7 @@ SELECT 	row_number() over() AS id,
         NULL::INTEGER aantal_keer_verpompen,
         NULL::TEXT afstand_tot_rwzi,
         NULL::TEXT type_gebied,
-		ST_Force3D(ST_Multi(nw.geom))::geometry(MultiPolygonZ, 28992) as geom
+		ST_Force3D(ST_Multi(ST_Buffer(nw.geom,0)))::geometry(MultiPolygonZ, 28992) as geom
 FROM 	kadastraal_perceel AS ori
 JOIN	all_ids_and_geoms AS nw
 	ON	ori.id = nw.id
