@@ -8,6 +8,7 @@ from afkoppelkansenkaart.processing.percentage_concretisation_algorithm import P
 from afkoppelkansenkaart.processing.potential_storage_locations_algorithm import PotentialStorageLocationAlgorithm
 from afkoppelkansenkaart.processing.parcels_to_geopackage import Parcels2GeoPackageAlgorithm
 from afkoppelkansenkaart.processing.distance_to_storage_location_algorithm import DistanceToStorageLocationAlgorithm
+from afkoppelkansenkaart.processing.transfer_sewerage_type_algorithm import TransferSewerageTypeAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms for 3Di"""
@@ -17,10 +18,11 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
         self.addAlgorithm(Inloop2PostGISAlgorithm(1))
         self.addAlgorithm(HeightEstimatorAlgorithm(4))
         self.addAlgorithm(PercentageCultivationAlgorithm(2))
+        self.addAlgorithm(TransferSewerageTypeAlgorithm(8))
         self.addAlgorithm(PercentageConcretisationAlgorithm(3))
-        self.addAlgorithm(Parcels2GeoPackageAlgorithm(5))
-        self.addAlgorithm(PotentialStorageLocationAlgorithm(6))
-        self.addAlgorithm(DistanceToStorageLocationAlgorithm(7))
+        self.addAlgorithm(Parcels2GeoPackageAlgorithm(7))
+        self.addAlgorithm(PotentialStorageLocationAlgorithm(5))
+        self.addAlgorithm(DistanceToStorageLocationAlgorithm(6))
        
     def id(self, *args, **kwargs):
         """The ID of your plugin, used for identifying the provider.

@@ -2,10 +2,9 @@
 
 """
 /***************************************************************************
- PercentageConcretisationAlgorithm
+ TransferSewerageTypeAlgorithm
                                  A QGIS plugin
- Calculate percentage cultivation
-                              -------------------
+                               -------------------
         begin                : 2021-01-27
         copyright            : (C) 2021 by Nelen en Schuurmans
         email                : emile.debadts@nelen-schuurmans.nl
@@ -29,16 +28,14 @@ __copyright__ = "(C) 2021 by Nelen en Schuurmans"
 
 __revision__ = "$Format:%H$"
 
-from qgis.core import QgsProcessingParameterNumber
 from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
-from ..constants import *
 from ..database import execute_sql_script
+from ..constants import *
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
-
-class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
+class TransferSewerageTypeAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
@@ -46,7 +43,6 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
 
     OUTPUT = "OUTPUT"
     INPUT_DB = "INPUT_DB"
-    INPUT_PER = "INPUT_PER"
 
     def initAlgorithm(self, config):
         """
@@ -57,17 +53,6 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterProviderConnection(self.INPUT_DB, self.tr("Connectie naam"), "postgres")
         )
-
-        param = QgsProcessingParameterNumber(self.INPUT_PER, self.tr("Groen percentage"), type=QgsProcessingParameterNumber.Double, 
-                minValue=0.0,
-                maxValue=100.0, 
-                defaultValue=50.0
-        )
-        param.setMetadata( {'widget_wrapper':
-        { 'decimals': 2 }})
-
-        self.addParameter(param)
-        
 
         self.addOutput(
             QgsProcessingOutputBoolean(
@@ -80,43 +65,25 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        success = False
-        
         feedback.pushInfo(f"Start algo")
 
         connection_name = self.parameterAsConnectionName(
             parameters, self.INPUT_DB, context
         )
 
-        percentage = self.parameterAsDouble(parameters, 
-            self.INPUT_PER, context
-        )
-
-        feedback.pushInfo(f"Percentage: {percentage}")
+        success = False
     
-        execute_sql_script(connection_name, 'parcel_geometry_without_buildings', feedback)
+        execute_sql_script(connection_name, 'sewerage_type', feedback)
         
-        feedback.pushInfo(f"Gebouwen verwijderd")
-
-        self.calculate_percentage(connection_name, feedback)
-
-        # postgis_parcel_source_layer = self.get_postgis_layer(
-        #     connection_name,
-        #     'kadastraal_perceel_subdivided',
-        #     qgis_layer_name = "Perceel"
-        # )
-
-        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
-
         success = True
-        # Return the results of the algorithm. 
+
         return {self.OUTPUT: success}
 
     def name(self):
-        return "percentageconcretisation"
+        return "transferseweragetype"
 
     def displayName(self):
-        return self.tr("Percentage verharding")
+        return self.tr("Overnemen stelseltype")
 
     def group(self):
         return self.tr("afkoppelkanskaart")
@@ -125,17 +92,10 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
         return "afkoppelkanskaart"
 
     def shortHelpString(self):
-
-        return self.tr("Bepalen van percentage verhardingouwing")
+        return self.tr("Overnemen van riool stelseltype")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
-        return PercentageConcretisationAlgorithm()
-    
-    def calculate_percentage(self, connection_name:str, feedback):
-        pass
-
-
-
+        return TransferSewerageTypeAlgorithm()
