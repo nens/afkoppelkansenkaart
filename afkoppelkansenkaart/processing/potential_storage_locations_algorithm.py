@@ -34,7 +34,7 @@ from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 from ..constants import *
-from ..database import get_pscycopg_connection_params
+from ..database import execute_sql_script, get_postgis_layer
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
 class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
@@ -67,26 +67,27 @@ class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        feedback.pushInfo(f"Start algo")
-
+        
         connection_name = self.parameterAsConnectionName(
             parameters, self.INPUT_DB, context
         )
 
 
         success = False
-    
-        # elf.calculate_percentage(connection_name, feedback)
+
+        feedback.pushInfo(f"Bepalen locaties")
+   
+        execute_sql_script(connection_name, 'derive_potential_storage_locations', feedback)
         
-        # feedback.pushInfo(f"Percentage bepaald")
+        feedback.pushInfo(f"Locaties bepaald")
 
-        # postgis_parcel_source_layer = self.get_postgis_layer(
-        #     connection_name,
-        #     'kadastraal_perceel_subdivided',
-        #     qgis_layer_name = "Perceel"
-        # )
+        postgis_parcel_source_layer = get_postgis_layer(
+            connection_name,
+            'potentiele_bergingslocaties',
+            qgis_layer_name = 'Potentiële bergingslocaties'
+        )
 
-        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
+        self.add_to_layer_tree_group(postgis_parcel_source_layer)
 
         success = True
         # Return the results of the algorithm. 
@@ -113,4 +114,19 @@ class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
 
     def createInstance(self):
         return PotentialStorageLocationAlgorithm()
-    
+
+    def add_to_layer_tree_group(self, layer):
+        """
+        Add a layer to the Afkoppelkansenkaart layer tree group
+        """
+        project = QgsProject.instance()
+        project.addMapLayer(layer, addToLegend=False)
+        self.layer_group.insertLayer(0, layer)
+
+    @property
+    def layer_group(self):
+        root = QgsProject.instance().layerTreeRoot()
+        _layer_group = root.findGroup('Afkoppelkansenkaart')
+        if not _layer_group:
+            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
+        return _layer_group
