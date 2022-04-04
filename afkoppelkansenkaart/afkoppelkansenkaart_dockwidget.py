@@ -242,7 +242,6 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
              qgis_layer_name = PARCEL_POSTGIS_LAYER_NAME
         )
         self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
-        # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
         self.check_bewerkingen_ui()
 

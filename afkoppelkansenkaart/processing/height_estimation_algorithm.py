@@ -37,8 +37,6 @@ from qgis.core import QgsProcessingParameterRasterLayer
 from qgis.core import QgsProcessingParameterFeatureSource
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
-from ..database import execute_sql_script
-
 
 class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
 
@@ -152,7 +150,6 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
         return "afkoppelkanskaart"
 
     def shortHelpString(self):
-
         return self.tr("Bepaal de (mediane) hoogteligging van elk perceel op basis van de opgegeven DEM.")
 
     def tr(self, string):

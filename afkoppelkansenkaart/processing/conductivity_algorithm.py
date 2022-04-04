@@ -163,8 +163,7 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         return "afkoppelkanskaart"
 
     def shortHelpString(self):
-
-        return self.tr("Bepaal de doorlantendheid op basis van de opgegeven bodemkaart.")
+        return self.tr("Bepaal de doorlatendheid op basis van de opgegeven bodemkaart.")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)

@@ -146,7 +146,6 @@ class DistanceToStorageLocationAlgorithm(OrderedProcessingAlgorithm):
         return "afkoppelkanskaart"
 
     def shortHelpString(self):
-
         return self.tr("Bepaal de afstand tot berginglocaties op basis van de opgegeven DEM.")
 
     def tr(self, string):

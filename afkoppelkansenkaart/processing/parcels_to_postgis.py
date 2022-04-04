@@ -37,9 +37,7 @@ from qgis.core import QgsProcessingParameterProviderConnection
 from qgis.core import QgsProcessingException
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
-import psycopg2
 from ..constants import *
-from ..database import get_pscycopg_connection_params
 from ..database import get_postgis_layer
 from ..database import execute_sql_script
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
@@ -112,7 +110,6 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
             'kadastraal_perceel_subdivided',
             qgis_layer_name = PARCEL_POSTGIS_LAYER_NAME
         )
-        # QgsProject.instance().addMapLayer(postgis_parcel_source_layer, addToLegend=False)
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
 
         success = True

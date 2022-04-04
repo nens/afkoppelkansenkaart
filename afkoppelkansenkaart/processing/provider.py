@@ -12,7 +12,7 @@ from afkoppelkansenkaart.processing.transfer_sewerage_type_algorithm import Tran
 from afkoppelkansenkaart.processing.conductivity_algorithm import CalculateConductivityAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
-    """Loads the Processing Toolbox algorithms for 3Di"""
+    """Loads the Processing Toolbox algorithms"""
 
     def loadAlgorithms(self, *args, **kwargs):
         self.addAlgorithm(Parcels2PostGISAlgorithm(0))

@@ -6,9 +6,9 @@
                                  A QGIS plugin
  Imports PostGIS layers into geopackage
                               -------------------
-        begin                : 2021-01-27
-        copyright            : (C) 2021 by Nelen en Schuurmans
-        email                : emile.debadts@nelen-schuurmans.nl
+        begin                : 2022-03-01
+        copyright            : (C) 2022 by Nelen en Schuurmans
+        email                : leendert.vanwolfswinkel@nelen-schuurmans.nl
  ***************************************************************************/
 
 /***************************************************************************
@@ -41,7 +41,6 @@ from qgis.core import edit
 from ..constants import *
 from ..database import get_postgis_layer
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
-from qgis import processing
 
 
 class Parcels2GeoPackageAlgorithm(OrderedProcessingAlgorithm):

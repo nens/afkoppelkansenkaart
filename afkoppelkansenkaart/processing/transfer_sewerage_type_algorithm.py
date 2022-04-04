@@ -4,10 +4,10 @@
 /***************************************************************************
  TransferSewerageTypeAlgorithm
                                  A QGIS plugin
-                               -------------------
-        begin                : 2021-01-27
-        copyright            : (C) 2021 by Nelen en Schuurmans
-        email                : emile.debadts@nelen-schuurmans.nl
+                              -------------------
+        begin                : 2022-03-01
+        copyright            : (C) 2022 by Nelen en Schuurmans
+        email                : leendert.vanwolfswinkel@nelen-schuurmans.nl
  ***************************************************************************/
 
 /***************************************************************************
@@ -21,7 +21,7 @@
 """
 
 __author__ = "Nelen en Schuurmans"
-__date__ = "2021-01-27"
+__date__ = "2022-03-01"
 __copyright__ = "(C) 2021 by Nelen en Schuurmans"
 
 # This will get replaced with a git SHA1 when you do a git archive
