@@ -57,15 +57,15 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         """
 
         self.addParameter(
-            QgsProcessingParameterProviderConnection(self.INPUT_DB, self.tr("Connectie naam"), "postgres")
+            QgsProcessingParameterProviderConnection(self.INPUT_DB, self.tr("Connectienaam"), "postgres")
         )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.INPUT_POL, self.tr("Berging locaties"), [QgsProcessing.TypeVectorPolygon] )
+            QgsProcessingParameterFeatureSource(self.INPUT_POL, self.tr("Perceel polygon"), [QgsProcessing.TypeVectorPolygon] )
         )
 
         self.addParameter(
-            QgsProcessingParameterRasterLayer(self.INPUT_DEM, self.tr("Digital Elevation Model"))
+            QgsProcessingParameterRasterLayer(self.INPUT_DEM, self.tr("Bodemkaart"))
         )
         
         self.addOutput(
@@ -103,27 +103,45 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
             context,
         )
 
-        target_field_idx = input_pol_source.fields().indexFromName('hoogte_median')
-        if target_field_idx != -1:
-                input_pol_source_layer.startEditing()
-                input_pol_source_layer.deleteAttribute(target_field_idx)
-                if input_pol_source_layer.commitChanges(): 
-                    feedback.pushInfo('hoogte_medial attribuut verwijderd')
-                else:
-                    feedback.reportError("Verwijderen attribuut mislukt", fatalError=True)
-                    return {self.OUTPUT: success}
-                
-        processing.run("native:zonalstatistics", { 
-            'INPUT_VECTOR': parameters[self.INPUT_POL],
-            'INPUT_RASTER': parameters[self.INPUT_DEM],
-            'RASTER_BAND':1,
-            'COLUMN_PREFIX':'hoogte_',
-            'STATISTICS':[3], #MEDIAN
-            }, context=context, feedback=feedback, is_child_algorithm=True)
+        execute_sql_script(connection_name, 'bofek_vertaaltabel', feedback)
+
+        #zonal statistics (the "fb" variant outputs a new layer)
+        zonal_statistics_run = processing.run(
+            "native:zonalstatisticsfb",
+            {
+                'INPUT': parameters[self.INPUT_POL],
+                'INPUT_RASTER': parameters[self.INPUT_DEM],
+                'RASTER_BAND': 1,
+                'COLUMN_PREFIX': 'pawn_code_',
+                'STATISTICS': [9],  # MAJORITY
+                'OUTPUT': 'TEMPORARY_OUTPUT'
+            },
+            context=context,
+            feedback=feedback,
+            is_child_algorithm=True
+        )
+
+        # directly upload to postgis
+        params = {
+            'INPUT': zonal_statistics_run['OUTPUT'],
+            'DATABASE': connection_name,
+            'SCHEMA': 'public',
+            'TABLENAME': 'bofek2',
+            'PRIMARY_KEY': 'id',
+            'GEOMETRY_COLUMN': 'geom',
+            'ENCODING': 'UTF-8',
+            'OVERWRITE': True,
+            'CREATEINDEX': True,
+            'LOWERCASE_NAMES': True,
+            'DROP_STRING_LENGTH': True,
+            'FORCE_SINGLEPART': False
+        }
+
+        processing.run("qgis:importintopostgis", params, context=context, feedback=feedback)
         
-        execute_sql_script(connection_name, 'distance_to_storage_location', feedback)
-        
-        feedback.pushInfo(f"Locaties bepaald")
+        feedback.pushInfo(f"statistieken geimporteerd")
+
+        execute_sql_script(connection_name, 'soil_type_and_hydraulic_conductivity', feedback)
 
         if feedback.isCanceled():
             return {self.OUTPUT: success}

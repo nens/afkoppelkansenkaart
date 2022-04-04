@@ -69,20 +69,10 @@ def get_pscycopg_connection_params(connection_name: str):
 
 
 def execute_sql_script(connection_name: str, sql_filename: str, feedback):
-    try:
-        conn = psycopg2.connect(**get_pscycopg_connection_params(connection_name))
-    except psycopg2.OperationalError:
-        feedback.reportError("Kan geen verbinding maken met de database", True)
-        return
-
-    cursor = conn.cursor()
     sql_file_name = os.path.join(SQL_DIR, f'{sql_filename}.sql')
     with open(sql_file_name, 'r') as sql_file:
         sql = sql_file.read()
-    cursor.execute(sql)
-    conn.commit()
-    conn.close()
-
+        execute_sql_query(connection_name, sql, feedback)
 
 def execute_sql_query(connection_name: str, query: str, feedback):
     try:
