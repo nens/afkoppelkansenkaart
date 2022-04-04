@@ -126,7 +126,7 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
             'INPUT': zonal_statistics_run['OUTPUT'],
             'DATABASE': connection_name,
             'SCHEMA': 'public',
-            'TABLENAME': 'bofek2',
+            'TABLENAME': 'bofek',
             'PRIMARY_KEY': 'id',
             'GEOMETRY_COLUMN': 'geom',
             'ENCODING': 'UTF-8',
