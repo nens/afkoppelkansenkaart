@@ -2,9 +2,9 @@
 
 """
 /***************************************************************************
- DistanceToStorageLocationAlgorithm
+ CalculateConductivityAlgorithm
                                  A QGIS plugin
- Calculate distance to storage locations
+ Calculates conductivity
                               -------------------
         begin                : 2022-03-01
         copyright            : (C) 2022 by Nelen en Schuurmans
@@ -26,7 +26,6 @@ __date__ = "2022-03-1"
 __copyright__ = "(C) 2022 by Nelen en Schuurmans"
 
 # This will get replaced with a git SHA1 when you do a git archive
-
 __revision__ = "$Format:%H$"
 
 from qgis import processing
@@ -40,7 +39,7 @@ from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 from ..database import execute_sql_script
 
-class DistanceToStorageLocationAlgorithm(OrderedProcessingAlgorithm):
+class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
@@ -134,10 +133,10 @@ class DistanceToStorageLocationAlgorithm(OrderedProcessingAlgorithm):
         return {self.OUTPUT: success}
 
     def name(self):
-        return "distancestorage"
+        return "calculateconductivity"
 
     def displayName(self):
-        return self.tr("Afstand tot bergingslocatie bepalen")
+        return self.tr("Bepalen van doorlatendheid")
 
     def group(self):
         return self.tr("afkoppelkanskaart")
@@ -147,10 +146,10 @@ class DistanceToStorageLocationAlgorithm(OrderedProcessingAlgorithm):
 
     def shortHelpString(self):
 
-        return self.tr("Bepaal de afstand tot berginglocaties op basis van de opgegeven DEM.")
+        return self.tr("Bepaal de doorlantendheid op basis van de opgegeven bodemkaart.")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
-        return DistanceToStorageLocationAlgorithm()
+        return CalculateConductivityAlgorithm()

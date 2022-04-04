@@ -6,9 +6,9 @@
                                  A QGIS plugin
  Calculate Height
                               -------------------
-        begin                : 2021-01-27
-        copyright            : (C) 2021 by Nelen en Schuurmans
-        email                : emile.debadts@nelen-schuurmans.nl
+        begin                : 2022-03-01
+        copyright            : (C) 2022 by Nelen en Schuurmans
+        email                : leendert.vanwolfswinkel@nelen-schuurmans.nl
  ***************************************************************************/
 
 /***************************************************************************
@@ -22,8 +22,8 @@
 """
 
 __author__ = "Nelen en Schuurmans"
-__date__ = "2021-01-27"
-__copyright__ = "(C) 2021 by Nelen en Schuurmans"
+__date__ = "2022-03-1"
+__copyright__ = "(C) 2022 by Nelen en Schuurmans"
 
 # This will get replaced with a git SHA1 when you do a git archive
 
@@ -33,13 +33,8 @@ from qgis import processing
 from qgis.core import QgsProcessing
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 from qgis.core import QgsProcessingException
-from qgis.core import QgsProcessingParameterFeatureSink
-from qgis.core import QgsProcessingParameterFileDestination
 from qgis.core import QgsProcessingParameterRasterLayer
 from qgis.core import QgsProcessingParameterFeatureSource
-from qgis.core import QgsProviderConnectionException
-from qgis.core import QgsProviderRegistry
-from qgis.core import QgsProcessingParameterVectorLayer
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 from ..database import execute_sql_script
@@ -100,9 +95,7 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
             self.OUTPUT,
             context,
         )
-        
-
-
+ 
         if feedback.isCanceled():
             return {self.OUTPUT: success}
             
