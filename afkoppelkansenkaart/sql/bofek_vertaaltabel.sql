@@ -19,7 +19,7 @@ INSERT INTO bofek_vertaaltabel (pawn_code, beschrijving, doorlatendheid) VALUES
 	(15, 'Zavel', 0.5),
 	(16, 'Lichte klei', 0.05),
 	(17, 'Zware klei', 0.0001),
-	(18, 'Klei op veen'0.01),
+	(18, 'Klei op veen', 0.01),
 	(19, 'Klei op zand', 0.01),
 	(20, 'Klei op grof zand', 0.01),
 	(21, 'Leem', 0.05)
