@@ -7,7 +7,7 @@ with perc_berging_koppeling AS (
 			perc.maaiveldhoogte as perceel_maaiveldhoogte, 
 			berg.id as bergings_id,
 			berg.hoogte_median as berging_hoogte,
-			(perc.hoogte_mediaan-berg.median)/(ST_Distance(perc.geom, berg.geom) + 0.01) as verhang
+			(perc.maaiveldhoogte - berg.hoogte_median)/(ST_Distance(perc.geom, berg.geom) + 0.01) as verhang
 	FROM 	kadastraal_perceel_subdivided AS perc
 	LEFT JOIN potentiele_bergingslocaties AS berg 
 		ON 	ST_DWithin(perc.geom, berg.geom, 100) AND 
