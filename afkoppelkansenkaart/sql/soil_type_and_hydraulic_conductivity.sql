@@ -3,7 +3,7 @@ ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS bodemsoort te
 ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS doorlatendheid_bodem double precision;
 
 UPDATE 	kadastraal_perceel_subdivided AS perc
-SET 	bodemsoort = vert.beschrijving
+SET 	bodemsoort = bofek_vertaaltabel.beschrijving
 FROM 	bofek, 
 		bofek_vertaaltabel
 WHERE 	perc.id = bofek.id 

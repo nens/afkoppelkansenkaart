@@ -16,7 +16,7 @@ with perc_berging_koppeling AS (
 			ST_Distance(perc.geom, berg.geom)
 	)
 UPDATE 	kadastraal_perceel_subdivided AS tgt
-SET 	afstand_tot_bergingslocatie = src.afstand, 
+SET 	afstand_tot_bergingslocatie = src.afstand 
 FROM 	perc_berging_koppeling AS src
 WHERE 	src.perceel_id = tgt.id
 ; 
