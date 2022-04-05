@@ -21,7 +21,7 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
         self.addAlgorithm(PercentageCultivationAlgorithm(2))
         self.addAlgorithm(TransferSewerageTypeAlgorithm(8))
         self.addAlgorithm(PercentageConcretisationAlgorithm(3))
-        self.addAlgorithm(Parcels2GeoPackageAlgorithm(7))
+        self.addAlgorithm(Parcels2GeoPackageAlgorithm(20))
         self.addAlgorithm(PotentialStorageLocationAlgorithm(5))
         self.addAlgorithm(DistanceToStorageLocationAlgorithm(6))
         self.addAlgorithm(CalculateConductivityAlgorithm(5))
