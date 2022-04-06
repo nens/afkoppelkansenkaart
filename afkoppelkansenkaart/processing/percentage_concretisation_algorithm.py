@@ -90,22 +90,14 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
         percentage = self.parameterAsDouble(parameters, 
             self.INPUT_PER, context
         )
+        percentage = percentage / 100
 
         feedback.pushInfo(f"Percentage: {percentage}")
     
         execute_sql_script(connection_name, 'parcel_geometry_without_buildings', feedback)
-        
         feedback.pushInfo(f"Gebouwen verwijderd")
 
-        self.calculate_percentage(connection_name, feedback)
-
-        # postgis_parcel_source_layer = self.get_postgis_layer(
-        #     connection_name,
-        #     'kadastraal_perceel_subdivided',
-        #     qgis_layer_name = "Perceel"
-        # )
-
-        # self.add_to_layer_tree_group(postgis_parcel_source_layer)
+        execute_sql_script(connection_name, 'impervious_percentage', feedback, {"groenpercentage": percentage})
 
         success = True
         # Return the results of the algorithm. 
@@ -131,9 +123,5 @@ class PercentageConcretisationAlgorithm(OrderedProcessingAlgorithm):
 
     def createInstance(self):
         return PercentageConcretisationAlgorithm()
-    
-    def calculate_percentage(self, connection_name:str, feedback):
-        pass
-
 
 

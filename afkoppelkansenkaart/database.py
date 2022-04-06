@@ -68,10 +68,13 @@ def get_pscycopg_connection_params(connection_name: str):
     return result
 
 
-def execute_sql_script(connection_name: str, sql_filename: str, feedback):
+def execute_sql_script(connection_name: str, sql_filename: str, feedback, parameters = None):
     sql_file_name = os.path.join(SQL_DIR, f'{sql_filename}.sql')
     with open(sql_file_name, 'r') as sql_file:
         sql = sql_file.read()
+        if parameters is not None:
+            sql = sql.format(**parameters)
+            feedback.pushInfo(f"New query: {sql}")
         execute_sql_query(connection_name, sql, feedback)
 
 def execute_sql_query(connection_name: str, query: str, feedback):
