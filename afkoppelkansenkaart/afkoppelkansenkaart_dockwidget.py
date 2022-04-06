@@ -35,6 +35,7 @@ from qgis.core import (
     Qgis,
     QgsProject,
     QgsVectorLayer,
+    QgsFeatureSource
 )
 from qgis.utils import iface
 import processing
@@ -200,6 +201,14 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         params = {}  # A dictionary to load some default value in the algo
         run_silent = False
 
+        iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                f"Starting {algo_name}",
+                level=Qgis.Info,
+                duration=3
+            )
+
+
         # in case certain data is available, prepopulate the parameters and
         # run the algo without dialog
 
@@ -209,6 +218,11 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             params['INPUT_DB'] = self.connection_name
             params['INPUT_POL'] = self.parcel_layer_id
             run_silent = True
+        elif algo_name is "percentagecultivation":
+            params['INPUT_DB'] = self.connection_name
+            run_silent = True
+        elif algo_name is "percentageconcretisation":
+            params['INPUT_DB'] = self.connection_name
         elif algo_name is "heightestimator":
             # retrieve subdivided parcel layer
             subdivided_parcel_layer_id = 0
@@ -223,6 +237,48 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
                 return
 
             params['INPUT_POL'] = subdivided_parcel_layer_id
+        elif algo_name is "calculateconductivity":
+
+            # retrieve subdivided parcel layer
+            subdivided_parcel_layer_id = 0
+            try:
+                subdivided_parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_POSTGIS_LAYER_NAME)[0].id()
+            except IndexError:  # No layer of that name exists:
+                iface.messageBar().pushMessage(
+                    MESSAGE_CATEGORY,
+                    "Nog geen percelenkaart beschikbaar",
+                    level=Qgis.Warning,
+                    duration=3)
+                return
+            params['INPUT_POL'] = subdivided_parcel_layer_id
+            params['INPUT_DB'] = self.connection_name
+        elif algo_name is "potentialstorage":
+            params['INPUT_DB'] = self.connection_name
+            run_silent = True
+        elif algo_name is "distancestorage":
+            params['INPUT_DB'] = self.connection_name
+            potential_storage_layer = get_postgis_layer(
+                self.connection_name,
+                'potentiele_bergingslocaties',
+                qgis_layer_name = 'Potentiële bergingslocaties'
+            )
+
+            # retrieve subdivided parcel layer
+            potential_storage_layer_id = 0
+            try:
+                potential_storage_layer_id = QgsProject.instance().mapLayersByName("Potentiële bergingslocaties")[0].id()
+            except IndexError:  # No layer of that name exists:
+                iface.messageBar().pushMessage(
+                    MESSAGE_CATEGORY,
+                    "Nog geen potentiële bergingslocaties beschikbaar",
+                    level=Qgis.Warning,
+                    duration=3)
+                return
+
+            params['INPUT_POL'] = potential_storage_layer_id
+        elif algo_name is "transferseweragetype":
+            params['INPUT_DB'] = self.connection_name
+            run_silent = True
 
         if run_silent:  
             processing.run(algo, params)
