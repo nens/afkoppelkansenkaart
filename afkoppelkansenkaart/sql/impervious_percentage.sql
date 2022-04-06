@@ -4,5 +4,5 @@ ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS verhard_opper
 ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS verhard_percentage double precision;
 
 UPDATE 	kadastraal_perceel_subdivided SET verhard_oppervlak = ST_Area(geom_geenpand) * (1-{groenpercentage});
-UPDATE 	kadastraal_perceel_subdivided SET verhard_percentage = verhard_oppervlak / oppervlakte_perceel;
+UPDATE 	kadastraal_perceel_subdivided SET verhard_percentage = (verhard_oppervlak / oppervlakte_perceel) * 100;
 		
