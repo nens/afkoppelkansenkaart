@@ -12,7 +12,7 @@ with perc_berging_koppeling AS (
 	LEFT JOIN potentiele_bergingslocaties AS berg 
 		ON 	ST_DWithin(perc.geom, berg.geom, 100) AND 
 			(perc.maaiveldhoogte - berg.hoogte_median) / (ST_Distance(perc.geom, berg.geom) + 0.01) > (1/100.0)
-	ORDER BY perc.uid,
+	ORDER BY perc.id,
 			ST_Distance(perc.geom, berg.geom)
 	)
 UPDATE 	kadastraal_perceel_subdivided AS tgt

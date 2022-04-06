@@ -27,5 +27,8 @@ WHERE 	pt.id = pzp.id
 UPDATE 	kadastraal_perceel_subdivided 
 SET 	geom_geenpand = ST_Multi(geom)
 WHERE 	geom_geenpand IS NULL
+
+ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS area_geom_geenpand double precision; 
+SET 	area_geom_geenpand = ST_Area((geom_geenpand)
 ;
 
