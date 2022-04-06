@@ -370,7 +370,6 @@ class AfkoppelKansenKaartDatabase(MCADatabase):
     def __init__(self):
         super().__init__(result_view_name='afkoppelkansenkaart')
 
-    def calc_verhardingspercentage(self):
-        pass
+
 
 
