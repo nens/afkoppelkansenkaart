@@ -1,0 +1,2 @@
+python C:\Users\ben.vanbasten\Documents\repos\afkoppelkansenkaart\afkoppelkansenkaart\deploy.py
+copy /y "G:\Projecten W (2021)\W0185 - Deltaplan Zundert\Gegevens\Bewerking\Afkoppelkansenkaart Testdata\*.*" "C:\Users\ben.vanbasten\Documents\3di\zundert"
