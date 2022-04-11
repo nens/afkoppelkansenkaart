@@ -25,7 +25,7 @@ class LayerDoesNotExistError(ValueError):
     pass
 
 
-def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom'):
+def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom', key_column_name=''):
     if not qgis_layer_name:
         qgis_layer_name = pg_layer_name
     uri = QgsDataSourceUri()
@@ -40,7 +40,8 @@ def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name:
     uri.setDataSource(
         aSchema='public',
         aTable=pg_layer_name,
-        aGeometryColumn=geometry_column_name
+        aGeometryColumn=geometry_column_name,
+        aKeyColumn=key_column_name
     )
 
     layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")

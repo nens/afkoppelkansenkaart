@@ -74,7 +74,7 @@ class Parcels2GeoPackageAlgorithm(OrderedProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        feedback.pushInfo(f"Start export to geopackage") 
+        feedback.pushInfo(f"Start exporteren van geopackage") 
 
         connection_name = self.parameterAsConnectionName(
             parameters, self.INPUT_DB, context
