@@ -105,7 +105,7 @@ VALUES  (6,'Gemengd',                       1,3),
         (6,'Infiltratievoorziening (RWA-IT/DWA)', 5,0),
         (6,'Maaiveld',                      6,0),
         (6,'Open water',                    7,0),
-        (6,'Gescheiden RWA/Gemengd',        8,2)
+        (6,'Gescheiden RWA/Gemengd',        8,2),
 
         (9,'T=1/6',                         1,1),
         (9,'T=2',                           2,2),
