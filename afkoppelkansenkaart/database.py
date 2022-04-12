@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from typing import Union
 
-import ogr
-import osr
+from osgeo import ogr
+from osgeo import osr
 import psycopg2
 import sqlite3
 from qgis.PyQt.QtCore import QSettings
