@@ -88,10 +88,10 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
         return self.tr("Percentage bebouwing")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Percelen verrijken")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Percelen verrijken"
 
     def shortHelpString(self):
         return self.tr("Bepalen van percentage bebouwing")

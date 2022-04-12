@@ -137,13 +137,13 @@ class DistanceToStorageLocationAlgorithm(OrderedProcessingAlgorithm):
         return "distancestorage"
 
     def displayName(self):
-        return self.tr("Afstand tot bergingslocatie bepalen")
+        return self.tr("Afstand tot potentiële bergingslocaties")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Percelen verrijken")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Percelen verrijken"
 
     def shortHelpString(self):
         return self.tr("Bepaal de afstand tot berginglocaties op basis van de opgegeven DEM.")

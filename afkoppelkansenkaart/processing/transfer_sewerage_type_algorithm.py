@@ -83,16 +83,16 @@ class TransferSewerageTypeAlgorithm(OrderedProcessingAlgorithm):
         return "transferseweragetype"
 
     def displayName(self):
-        return self.tr("Overnemen stelseltype")
+        return self.tr("Stelseltype")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Percelen verrijken")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Percelen verrijken"
 
     def shortHelpString(self):
-        return self.tr("Overnemen van riool stelseltype")
+        return self.tr("Overnemen van stelseltype riool uit de BGT Inlooptabel")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)

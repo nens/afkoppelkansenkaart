@@ -123,10 +123,10 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
         return self.tr("Percelen naar PostGIS")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Import en export")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Import en export"
 
     def shortHelpString(self):
 

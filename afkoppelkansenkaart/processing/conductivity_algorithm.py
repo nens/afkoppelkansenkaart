@@ -154,13 +154,13 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         return "calculateconductivity"
 
     def displayName(self):
-        return self.tr("Bepalen van doorlatendheid")
+        return self.tr("Doorlatendheid")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Percelen verrijken")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Percelen verrijken"
 
     def shortHelpString(self):
         return self.tr("Bepaal de doorlatendheid op basis van de opgegeven bodemkaart.")

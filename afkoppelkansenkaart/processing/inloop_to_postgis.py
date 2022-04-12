@@ -114,10 +114,10 @@ class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
         return self.tr("BGT Inlooptabel naar PostGIS")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Import en export")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Import en export"
 
     def shortHelpString(self):
         return self.tr("Importeren van inlooptabel in PostGIS")
