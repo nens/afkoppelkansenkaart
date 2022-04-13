@@ -158,7 +158,7 @@ color: rgb(0, 0, 0);</string>
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>28</height>
+               <height>0</height>
               </size>
              </property>
              <property name="styleSheet">
@@ -210,7 +210,7 @@ color: rgb(0, 0, 0);</string>
                <property name="minimumSize">
                 <size>
                  <width>30</width>
-                 <height>0</height>
+                 <height>28</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -233,7 +233,17 @@ color: rgb(0, 0, 0);</string>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_PostGISDatabases"/>
+              <widget class="QComboBox" name="comboBox_PostGISDatabases">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_StatusValue">
@@ -259,6 +269,12 @@ color: rgb(0, 0, 0);</string>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_reload">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>28</height>
+                </size>
+               </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(170, 255, 255);
 color: rgb(0, 0, 0);</string>
@@ -306,7 +322,11 @@ color: rgb(0, 0, 0);</string>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QComboBox" name="comboBox_Bewerkingen"/>
+              <widget class="QComboBox" name="comboBox_Bewerkingen">
+               <property name="sizeAdjustPolicy">
+                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_Play">
