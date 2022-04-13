@@ -141,13 +141,13 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
         return "heightestimator"
 
     def displayName(self):
-        return self.tr("Hoogteligging bepalen")
+        return self.tr("Hoogteligging")
 
     def group(self):
-        return self.tr("afkoppelkanskaart")
+        return self.tr("Percelen verrijken")
 
     def groupId(self):
-        return "afkoppelkanskaart"
+        return "Percelen verrijken"
 
     def shortHelpString(self):
         return self.tr("Bepaal de (mediane) hoogteligging van elk perceel op basis van de opgegeven DEM.")
