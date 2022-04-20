@@ -109,7 +109,7 @@ class DistanceToRWZIAlgorithm(OrderedProcessingAlgorithm):
 
         feedback.pushInfo(f"RWZI's geïmporteerd in PostGIS.")
 
-        # #execute_sql_script(connection_name, 'distance_to_sewage_treatment_plant', feedback)
+        execute_sql_script(connection_name, 'distance_to_sewage_treatment_plant', feedback)
                
         feedback.pushInfo(f"Afstand to RWZI's bepaald.")
 
