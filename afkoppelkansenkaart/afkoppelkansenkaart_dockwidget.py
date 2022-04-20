@@ -324,11 +324,6 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self.label_StatusValue.setText('Invalid connection details')
             
     def update_bewerking(self, idx):
-        iface.messageBar().pushMessage(
-            MESSAGE_CATEGORY,
-            f"Geselecteerd algoritme: ({idx})",
-            level=Qgis.Info,
-            duration=10)
         self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())
 
     def check_bewerkingen_ui(self):
