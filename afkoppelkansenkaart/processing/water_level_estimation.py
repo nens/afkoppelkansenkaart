@@ -126,14 +126,22 @@ class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
             feedback.pushInfo(f"ghg_tov_maaiveld van feature {source_feature.id()} wordt nu "
                               f"{feature.attribute('ghg_tov_maaiveld_median')}")
             input_pol_source_layer.changeAttributeValue(
-                feature.id(),
+                source_feature.id(),
                 target_field_idx,
                 feature.attribute('ghg_tov_maaiveld_median')
             )
         input_pol_source_layer.commitChanges()
 
-        if feedback.isCanceled():
-            return {self.OUTPUT: success}
+        # processing.run("native:zonalstatistics", {
+        #     'INPUT_VECTOR': parameters[self.INPUT_POL],
+        #     'INPUT_RASTER': parameters[self.INPUT_DEM],
+        #     'RASTER_BAND':1,
+        #     'COLUMN_PREFIX':'test_ghg_maaiveld_',
+        #     'STATISTICS':[3], #MEDIAN
+        #     }, context=context, feedback=feedback, is_child_algorithm=True)
+
+        # if feedback.isCanceled():
+        #     return {self.OUTPUT: success}
         
         success = True
         # Return the results of the algorithm. 
