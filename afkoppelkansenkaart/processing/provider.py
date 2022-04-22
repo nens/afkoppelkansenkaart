@@ -11,6 +11,7 @@ from afkoppelkansenkaart.processing.distance_to_storage_location_algorithm impor
 from afkoppelkansenkaart.processing.transfer_sewerage_type_algorithm import TransferSewerageTypeAlgorithm
 from afkoppelkansenkaart.processing.conductivity_algorithm import CalculateConductivityAlgorithm
 from afkoppelkansenkaart.processing.distance_to_rwzi import DistanceToRWZIAlgorithm
+from afkoppelkansenkaart.processing.water_level_estimation import WaterLevelEstimatorAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
     """Loads the Processing Toolbox algorithms"""
@@ -27,6 +28,7 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
         self.addAlgorithm(DistanceToStorageLocationAlgorithm(6))
         self.addAlgorithm(CalculateConductivityAlgorithm(5))
         self.addAlgorithm(DistanceToRWZIAlgorithm(9))
+        self.addAlgorithm(WaterLevelEstimatorAlgorithm(10))
        
     def id(self, *args, **kwargs):
         """The ID of your plugin, used for identifying the provider.
