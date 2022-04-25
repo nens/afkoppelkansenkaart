@@ -3,11 +3,11 @@ ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS afstand_tot_r
 with perceel_rwzi_koppeling AS (
 	SELECT DISTINCT ON (perc.id) 
 			perc.id as perceel_id, 
-			ST_Distance(perc.geom, rwzi.geom) as afstand
+			ST_Distance(perc.geom, berg.geom) as afstand
 	FROM 	kadastraal_perceel_subdivided AS perc,
 			rwzi AS berg 
 	ORDER BY perc.id,
-			ST_Distance(perc.geom, rwzi.geom)
+			ST_Distance(perc.geom, berg.geom)
 	)
 UPDATE 	kadastraal_perceel_subdivided AS tgt
 SET 	afstand_tot_rwzi = src.afstand 
