@@ -121,13 +121,6 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
         # for debugging: add the raw layer to the project tree
         # self.add_to_layer_tree_group(zonal_statistics)
 
-        # why not do it in-place (variant without fb) followeed by a DB query?
-        # sql = """
-        # UPDATE kadastraal_perceel_subdivided SET maaiveldhoogte = maaiveldhoogte_median;
-        # ALTER TABLE kadastraal_perceel_subdivided DROP COLUMN maaiveldhoogte_median;
-        # """
-        # execute_sql_query(connection_name, sql, feedback)
-
         input_pol_source_layer.startEditing()
         for feature in zonal_statistics.getFeatures():
 
