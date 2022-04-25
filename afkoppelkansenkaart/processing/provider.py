@@ -9,7 +9,7 @@ from afkoppelkansenkaart.processing.potential_storage_locations_algorithm import
 from afkoppelkansenkaart.processing.parcels_to_geopackage import Parcels2GeoPackageAlgorithm
 from afkoppelkansenkaart.processing.distance_to_storage_location_algorithm import DistanceToStorageLocationAlgorithm
 from afkoppelkansenkaart.processing.transfer_sewerage_type_algorithm import TransferSewerageTypeAlgorithm
-from afkoppelkansenkaart.processing.conductivity_algorithm import CalculateConductivityAlgorithm
+from afkoppelkansenkaart.processing.soil_type_algorithm import SoilTypeAlgorithm
 from afkoppelkansenkaart.processing.distance_to_rwzi import DistanceToRWZIAlgorithm
 
 class AfkoppelKansenKaartProvider(QgsProcessingProvider):
@@ -25,7 +25,7 @@ class AfkoppelKansenKaartProvider(QgsProcessingProvider):
         self.addAlgorithm(Parcels2GeoPackageAlgorithm(20))
         self.addAlgorithm(PotentialStorageLocationAlgorithm(5))
         self.addAlgorithm(DistanceToStorageLocationAlgorithm(6))
-        self.addAlgorithm(CalculateConductivityAlgorithm(5))
+        self.addAlgorithm(SoilTypeAlgorithm(5))
         self.addAlgorithm(DistanceToRWZIAlgorithm(9))
        
     def id(self, *args, **kwargs):

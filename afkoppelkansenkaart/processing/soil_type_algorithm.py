@@ -39,7 +39,7 @@ from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
 from ..database import execute_sql_script
 
-class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
+class SoilTypeAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
@@ -141,7 +141,7 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         
         feedback.pushInfo(f"statistieken geimporteerd")
 
-        execute_sql_script(connection_name, 'soil_type_and_hydraulic_conductivity', feedback)
+        execute_sql_script(connection_name, 'soil_type', feedback)
 
         if feedback.isCanceled():
             return {self.OUTPUT: success}
@@ -154,7 +154,7 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         return "calculateconductivity"
 
     def displayName(self):
-        return self.tr("Doorlatendheid")
+        return self.tr("Bodemtype")
 
     def group(self):
         return self.tr("Percelen verrijken")
@@ -163,10 +163,10 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
         return "Percelen verrijken"
 
     def shortHelpString(self):
-        return self.tr("Bepaal de doorlatendheid op basis van de opgegeven bodemkaart.")
+        return self.tr("Het bodemtype op basis van de opgegeven bodemkaart.")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
-        return CalculateConductivityAlgorithm()
+        return SoilTypeAlgorithm()
