@@ -75,10 +75,10 @@ class DistanceToRWZIAlgorithm(OrderedProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         success = False
-        input_pol_source = self.parameterAsSource(parameters, self.INPUT_POL, context)
+        input_pol = self.parameterAsVectorLayer(parameters, self.INPUT_POL, context)
         connection_name = self.parameterAsConnectionName(parameters, self.INPUT_DB, context)
 
-        if input_pol_source is None:
+        if input_pol is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_POL))
 
         if connection_name is None:
@@ -90,6 +90,13 @@ class DistanceToRWZIAlgorithm(OrderedProcessingAlgorithm):
             context,
         )
 
+        # Do some checking on the layers coordinate reference system (CRS)
+        if input_pol.crs().authid() != 'EPSG:28992':
+            feedback.reportError(f'Input laag niet in EPSG:28992, maar in {input_pol.crs().authid()} ({input_pol.crs().description()})')
+            # https://gis.stackexchange.com/questions/316002/pyqgis-reproject-layer
+            # https://docs.qgis.org/3.22/en/docs/user_manual/processing_algs/qgis/vectorgeneral.html#reproject-layer
+            return {self.OUTPUT: success}
+        
         params = {
             'INPUT': parameters[self.INPUT_POL],
             'DATABASE': connection_name,
