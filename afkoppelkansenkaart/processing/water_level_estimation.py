@@ -37,6 +37,8 @@ from qgis.core import QgsProcessingParameterRasterLayer
 from qgis.core import QgsProcessingParameterFeatureSource
 from qgis.core import QgsProcessingOutputBoolean
 from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import QgsExpression
+from qgis.core import QgsFeatureRequest
 
 class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
 
@@ -74,17 +76,14 @@ class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         success = False
-        input_pol_source = self.parameterAsSource(parameters, self.INPUT_POL, context)
         input_pol_source_layer = self.parameterAsVectorLayer(parameters, self.INPUT_POL, context)
-        
-        target_field_idx = input_pol_source.fields().indexFromName('ghg_tov_maaiveld')
+        target_field_idx = input_pol_source_layer.fields().indexFromName('ghg_tov_maaiveld')
         if target_field_idx == -1:
             feedback.reportError("Ongeldige percelenlaag: het veld 'ghg_tov_maaiveld' ontbreekt", fatalError=True)
             return {self.OUTPUT: success}
-
         dem_layer = self.parameterAsRasterLayer(parameters, self.INPUT_DEM, context)
 
-        if input_pol_source is None:
+        if input_pol_source_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_POL))
             
         if dem_layer is None:
@@ -116,33 +115,55 @@ class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
         )
 
         zonal_statistics = context.getMapLayer(zonal_statistics_run['OUTPUT'])
+
+        # for debugging: add the raw layer to the project tree
+        # self.add_to_layer_tree_group(zonal_statistics)
+
         input_pol_source_layer.startEditing()
         for feature in zonal_statistics.getFeatures():
 
             if feedback.isCanceled():
                 break
 
-            source_feature = input_pol_source_layer.getFeature(feature.id())
-            feedback.pushInfo(f"ghg_tov_maaiveld van feature {source_feature.id()} wordt nu "
-                              f"{feature.attribute('ghg_tov_maaiveld_median')}")
-            input_pol_source_layer.changeAttributeValue(
-                source_feature.id(),
-                target_field_idx,
-                feature.attribute('ghg_tov_maaiveld_median')
-            )
-        input_pol_source_layer.commitChanges()
+            # The id() function of PYQGIS does not need to match the attribute value 'ID' (seems to 
+            # return index in current sorting): do an explicit join on 'ID'
+            zonal_temp_id = feature.attribute('id')
 
-        # processing.run("native:zonalstatistics", {
-        #     'INPUT_VECTOR': parameters[self.INPUT_POL],
-        #     'INPUT_RASTER': parameters[self.INPUT_DEM],
-        #     'RASTER_BAND':1,
-        #     'COLUMN_PREFIX':'test_ghg_maaiveld_',
-        #     'STATISTICS':[3], #MEDIAN
-        #     }, context=context, feedback=feedback, is_child_algorithm=True)
+            # find the parcels with the same ID
+            expression = QgsExpression(f'id = {zonal_temp_id}')
+            if expression.hasParserError():
+                feedback.reportError(expression.parserErrorString())
+                return {self.OUTPUT: success}
 
-        # if feedback.isCanceled():
-        #     return {self.OUTPUT: success}
-        
+            request = QgsFeatureRequest(expression)
+            
+            duplicate = False
+            for source_feature in input_pol_source_layer.getFeatures(request):
+            
+                if duplicate:
+                    feedback.reportError(self.tr('Laag bevat percelen met dezelfde ID:') + f'{zonal_temp_id}')
+                    input_pol_source_layer.rollBack()
+                    return {self.OUTPUT: success}
+                    
+                feedback.pushInfo(f"ghg_tov_maaiveld van feature {source_feature.attribute('id')}-{source_feature.attribute('brk_lokaalid')} wordt nu {feature.attribute('ghg_tov_maaiveld_median')} van {zonal_temp_id}-{feature.attribute('brk_lokaalid')}")
+                if ( source_feature.attribute('id') != zonal_temp_id):
+                    feedback.reportError(f"incorrecte ID: {source_feature.attribute('id')} vs {zonal_temp_id}")
+                    input_pol_source_layer.rollBack()
+                    return {self.OUTPUT: success}
+
+                input_pol_source_layer.changeAttributeValue(
+                    source_feature.id(),
+                    target_field_idx,
+                    feature.attribute('ghg_tov_maaiveld_median')
+                )
+                duplicate = True
+
+        if not input_pol_source_layer.commitChanges():
+            feedback.pushInfo("Committen mislukt")
+            for error_mes in input_pol_source_layer.commitErrors():
+                feedback.pushInfo(error_mes)
+            return {self.OUTPUT: success}
+
         success = True
         # Return the results of the algorithm. 
         return {self.OUTPUT: success}
@@ -160,7 +181,7 @@ class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
         return "Percelen verrijken"
 
     def shortHelpString(self):
-        return self.tr("Bepaal de (mediane) hoogte van de grondwaterstand van elk perceel op basis van de opgegeven DEM.")
+        return self.tr("Bepaal de (mediane) hoogte van de grondwaterstand van elk perceel op basis van het opgegeven hoogtemodel.")
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)
