@@ -266,6 +266,7 @@ class MCADatabase(Database):
     CRITERIUM = 'criterium'
     WEGING = 'weging'
 
+    PERCEEL_CRITERIUMWAARDE = 'perceel_criteriumwaarde'
     PERCEEL_CRITERIUMSCORE = 'perceel_criteriumscore'
     PERCEEL_DOMEINSCORE = 'perceel_domeinscore'
     PERCEEL_HOOFDONDERDEELSCORE = 'perceel_hoofdonderdeelscore'
@@ -285,6 +286,7 @@ class MCADatabase(Database):
     }
 
     VIEWS_GEOMETRY_TYPES = {
+        PERCEEL_CRITERIUMWAARDE: None,
         PERCEEL_CRITERIUMSCORE: None,
         PERCEEL_DOMEINSCORE: None,
         PERCEEL_HOOFDONDERDEELSCORE: None,
@@ -303,6 +305,22 @@ class MCADatabase(Database):
     def create_schema(self):
         self.execute_sql_file('schema')
         self._register_layers()
+
+    def create_perceel_criteriumwaarde_view(self):
+        """Create a view containing, in each row one value for one (numbered) criterium of one parcel"""
+        select_clauses = []
+        criterium_lyr = self.datasource.GetLayerByName('criterium')
+        for criterium in criterium_lyr:
+            select = f"SELECT   id AS perceel_id, " \
+                     f"         {criterium_id} AS criterium_id, " \
+                     f"         CAST({column_name} AS TEXT) AS waarde " \
+                     f"FROM     perceel".format(criterium_id=criterium[0], column_name=criterium[1])
+            select_clauses.append(select)
+        select_str = " UNION ".join(select_clauses)
+        sql = f"CREATE VIEW IF NOT EXISTS perceel_criteriumwaarde AS {select_str}"
+        self.datasource.ExecuteSQL(sql)
+        self.register_gpkg_layer(layer_name=self.result_view_name, geometry_type=MULTIPOLYGON)
+        self.update_gpkg_ogr_contents(table_name=self.result_view_name)
 
     def create_pivot_view(self):
         """Create a view containing one row for each perceel.

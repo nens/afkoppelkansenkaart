@@ -19,7 +19,8 @@ CREATE TABLE perceel (
 	percentage_bebouwing REAL, 
 	verhard_oppervlak REAL, 
 	verhard_percentage REAL, 
-	maaiveldhoogte REAL, 
+    af_te_koppelen_oppervlak REAL,
+	maaiveldhoogte REAL,
 	bodemsoort TEXT, 
 	doorlatendheid_bodem REAL, 
 	ghg_tov_maaiveld REAL, 
@@ -91,13 +92,6 @@ CREATE TABLE weging (
 	factor real
 );
 
-CREATE TABLE perceel_criteriumwaarde (
-    id integer primary key autoincrement,
-    perceel_id integer references perceel (id),
-    criterium_id integer references criterium (id),
-    waarde real
-);
-
 ----
 CREATE VIEW IF NOT EXISTS perceel_criteriumscore AS
 SELECT  waarde.id,
@@ -107,8 +101,8 @@ SELECT  waarde.id,
 FROM    perceel_criteriumwaarde AS waarde
 LEFT JOIN score_zoektabel AS klasse
     ON  waarde.criterium_id = klasse.criterium_id
-        AND waarde.waarde > klasse.klasse_ondergrens
-        AND waarde.waarde <= klasse.klasse_bovengrens
+        AND CAST(waarde.waarde AS real) > klasse.klasse_ondergrens
+        AND CAST(waarde.waarde AS real) <= klasse.klasse_bovengrens
 LEFT JOIN score_zoektabel AS categorie
     ON  waarde.criterium_id = categorie.criterium_id
         AND waarde.waarde = categorie.code

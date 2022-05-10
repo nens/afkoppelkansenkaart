@@ -154,6 +154,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self.db.epsg = 28992
             self.db.create_schema()
             self.db.initialise()
+            self.db.create_perceel_criteriumwaarde_view()
             self.db.create_pivot_view()
             self.add_afkoppelkansenkaart_layer()
             self.check_bewerkingen_ui()

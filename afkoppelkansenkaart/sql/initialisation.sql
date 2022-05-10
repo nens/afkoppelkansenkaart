@@ -20,16 +20,17 @@ values  (1, 'verharding', 'Verharding', 1),
 ;
 
 INSERT INTO criterium (id, naam, omschrijving, domein_id)
-VALUES  (1, 'verhardingspercentage', 'Percentage verharding', 1),
-        (2, 'bebouwingspercentage', 'Percentage bebouwing', 1),
-        (3, 'bodemberging', 'Hoeveelheid berging ondergrond (diepte GHG beneden maaiveld)', 2),
-        (4, 'doorlatendheid', 'Doorlatendheid (k-waarde)', 2),
+-- "naam" should match a column name in the "perceel" table
+VALUES  (1, 'verhard_percentage', 'Percentage verharding', 1),
+        (2, 'percentage_bebouwing', 'Percentage bebouwing', 1),
+        (3, 'ghg_tov_maaiveld', 'Hoeveelheid berging ondergrond (diepte GHG beneden maaiveld)', 2),
+        (4, 'doorlatendheid_bodem', 'Doorlatendheid (k-waarde)', 2),
         (5, 'afstand_tot_bergingslocatie', 'Afstand tot eventuele bergingslocatie', 3),
-        (6, 'stelseltype', 'Type stelsel dichtsbijzijnde riolering', 4),
-        (7, 'aantal_verpompen', 'Aantal keer verpompen naar RWZI', 4),
-        (8, 'afstand_rwzi', 'Transportafstand naar RWZI', 4),
-        (9, 'belasting_oppervlaktewater', 'Belasting oppervlaktewater waarin riolering overstort', 5),
-        (10, 'gebiedstype_wateroverlast', 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
+        (6, 'type_rioolstelsel', 'Type stelsel dichtsbijzijnde riolering', 4),
+        (7, 'aantal_keer_verpompen', 'Aantal keer verpompen naar RWZI', 4),
+        (8, 'afstand_tot_rwzi', 'Transportafstand naar RWZI', 4),
+        (9, 'kwetsbaarheid_oppervlaktewater', 'Ecologische kwetsbaarheid van het oppervlaktewater waarin riolering overstort', 5),
+        (10, 'type_gebied', 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
         (11, 'af_te_koppelen_oppervlak', 'Grootte van het af te koppelen verhard oppervlak', 7)
 ;
 
