@@ -17,7 +17,7 @@
    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
   </property>
   <property name="windowTitle">
-   <string>Afkoppelkansenkaart</string>
+   <string>Afkoppelrendementskaart</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
@@ -98,7 +98,7 @@
            <string notr="true">color: rgb(170, 255, 255);</string>
           </property>
           <property name="title">
-           <string>Afkoppelkansenkaart</string>
+           <string>Afkoppelrendementskaart</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
