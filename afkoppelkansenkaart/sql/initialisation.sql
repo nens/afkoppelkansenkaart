@@ -30,8 +30,8 @@ VALUES  (1, 'verhard_percentage', 'Percentage verharding', 1),
         (7, 'aantal_keer_verpompen', 'Aantal keer verpompen naar RWZI', 4),
         (8, 'afstand_tot_rwzi', 'Transportafstand naar RWZI', 4),
         (9, 'kwetsbaarheid_oppervlaktewater', 'Ecologische kwetsbaarheid van het oppervlaktewater waarin riolering overstort', 5),
-        (10, 'type_gebied', 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
-        (11, 'af_te_koppelen_oppervlak', 'Grootte van het af te koppelen verhard oppervlak', 7)
+        (10, 'gebiedstype_wateroverlast', 'Soort gebied potentie verminderen kans op wateroverlast benedenstrooms', 6),
+        (11, 'verhard_oppervlak', 'Grootte van het af te koppelen verhard oppervlak', 7)
 ;
 
 INSERT INTO weging (score_type, score_id, factor)

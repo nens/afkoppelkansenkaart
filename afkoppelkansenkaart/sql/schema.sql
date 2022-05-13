@@ -19,7 +19,6 @@ CREATE TABLE perceel (
 	percentage_bebouwing REAL, 
 	verhard_oppervlak REAL, 
 	verhard_percentage REAL, 
-    af_te_koppelen_oppervlak REAL,
 	maaiveldhoogte REAL,
 	bodemsoort TEXT, 
 	doorlatendheid_bodem REAL, 
@@ -30,7 +29,7 @@ CREATE TABLE perceel (
 	kwetsbaarheid_oppervlaktewater TEXT, 
 	aantal_keer_verpompen INTEGER, 
 	afstand_tot_rwzi TEXT, 
-	type_gebied TEXT,
+	gebiedstype_wateroverlast TEXT,
 	geom MULTIPOLYGON
 )
 ;
@@ -94,7 +93,7 @@ CREATE TABLE weging (
 
 ----
 CREATE VIEW IF NOT EXISTS perceel_criteriumscore AS
-SELECT  waarde.id,
+SELECT  row_number() over() as id,
         waarde.perceel_id,
         waarde.criterium_id,
         coalesce (klasse.score, categorie.score) AS score
@@ -109,7 +108,7 @@ LEFT JOIN score_zoektabel AS categorie
 ;
 
 CREATE VIEW IF NOT EXISTS perceel_domeinscore AS
-SELECT  pcs.id,
+SELECT  row_number() over() as id,
         pcs.perceel_id,
         domein.id AS domein_id,
         sum(pcs.score * weging.factor) / sum(weging.factor) AS score
@@ -121,11 +120,11 @@ LEFT JOIN domein
 LEFT JOIN weging 
     ON  score_type = 'criterium'
         AND score_id = criterium.id
-GROUP BY pcs.id, pcs.perceel_id, domein.id
+GROUP BY pcs.perceel_id, domein.id
 ;
 
 CREATE VIEW IF NOT EXISTS perceel_hoofdonderdeelscore AS
-SELECT  pds.id,
+SELECT  row_number() over() as id,
         pds.perceel_id,
         hoofdonderdeel.id AS hoofdonderdeel_id,
         sum(pds.score * weging.factor) / sum(weging.factor) AS score
@@ -134,15 +133,14 @@ LEFT JOIN domein
     ON  pds.domein_id = domein.id
 LEFT JOIN hoofdonderdeel
     ON  domein.hoofdonderdeel_id = hoofdonderdeel.id
-LEFT JOIN weging 
+LEFT JOIN weging
     ON  score_type = 'domein'
         AND score_id = domein.id
-GROUP BY pds.id, pds.perceel_id, domein.id
+GROUP BY pds.perceel_id, hoofdonderdeel.id
 ;
 
 CREATE VIEW IF NOT EXISTS perceel_eindscore AS
-SELECT  phs.id,
-        phs.perceel_id,
+SELECT  phs.perceel_id,
         sum(phs.score * weging.factor) / sum(weging.factor) AS score
 FROM    perceel_hoofdonderdeelscore AS phs
 LEFT JOIN hoofdonderdeel
@@ -150,7 +148,7 @@ LEFT JOIN hoofdonderdeel
 LEFT JOIN weging
     ON  score_type = 'hoofdonderdeel'
         AND score_id = hoofdonderdeel.id
-GROUP BY phs.id, phs.perceel_id
+GROUP BY phs.perceel_id
 ;
 
 CREATE VIEW IF NOT EXISTS buurt_eindscore AS

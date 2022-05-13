@@ -308,19 +308,24 @@ class MCADatabase(Database):
 
     def create_perceel_criteriumwaarde_view(self):
         """Create a view containing, in each row one value for one (numbered) criterium of one parcel"""
+        sql = f"DROP VIEW IF EXISTS perceel_criteriumwaarde;"
+        self.datasource.ExecuteSQL(sql)
         select_clauses = []
         criterium_lyr = self.datasource.GetLayerByName('criterium')
         for criterium in criterium_lyr:
             select = f"SELECT   id AS perceel_id, " \
-                     f"         {criterium_id} AS criterium_id, " \
-                     f"         CAST({column_name} AS TEXT) AS waarde " \
-                     f"FROM     perceel".format(criterium_id=criterium[0], column_name=criterium[1])
+                     f"         {criterium.GetFID()} AS criterium_id," \
+                     f"         CAST({criterium[0]} AS TEXT) AS waarde " \
+                     f"FROM     perceel"
             select_clauses.append(select)
         select_str = " UNION ".join(select_clauses)
-        sql = f"CREATE VIEW IF NOT EXISTS perceel_criteriumwaarde AS {select_str}"
+        sql = f"CREATE VIEW perceel_criteriumwaarde AS {select_str};"
         self.datasource.ExecuteSQL(sql)
-        self.register_gpkg_layer(layer_name=self.result_view_name, geometry_type=MULTIPOLYGON)
-        self.update_gpkg_ogr_contents(table_name=self.result_view_name)
+        self.register_gpkg_layer(
+            layer_name=self.PERCEEL_CRITERIUMWAARDE,
+            geometry_type=self.VIEWS_GEOMETRY_TYPES[self.PERCEEL_CRITERIUMWAARDE]
+        )
+        self.update_gpkg_ogr_contents(self.PERCEEL_CRITERIUMWAARDE)
 
     def create_pivot_view(self):
         """Create a view containing one row for each perceel.
@@ -362,6 +367,7 @@ class MCADatabase(Database):
                 ON  perceel.id = hoofdonderdeel.perceel_id
             LEFT JOIN perceel_eindscore AS eind
                 ON  perceel.id = eind.perceel_id
+            GROUP BY perceel.id
             ;
         """
         self.datasource.ExecuteSQL(sql)
