@@ -12,7 +12,7 @@ def test_create_datasource():
     db = AfkoppelKansenKaartDatabase()
     db.create_datasource(TEST_DB_PATH)
     db.epsg = 28992
-    db.create_schema()
+    db.create_schema_and_initialise()
     ogr_db = ogr.Open(str(TEST_DB_PATH))
     assert ogr_db.GetLayerCount() == len(db.VIEWS) + len(db.TABLES)
     assert ogr_db.GetLayerByName(db.PERCEEL_EINDSCORE) is not None

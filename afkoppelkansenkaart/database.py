@@ -288,8 +288,6 @@ class MCADatabase(Database):
     }
 
     VIEWS_GEOMETRY_TYPES = {
-        PERCEEL_CRITERIUMWAARDE: None,
-        PERCEEL_CRITERIUMSCORE: None,
         PERCEEL_DOMEINSCORE: None,
         PERCEEL_HOOFDONDERDEELSCORE: None,
         PERCEEL_EINDSCORE: None,
@@ -304,9 +302,15 @@ class MCADatabase(Database):
         super().__init__()
         self.result_view_name = result_view_name
 
-    def create_schema(self):
-        self.execute_sql_file('schema')
-        self._register_layers()
+    def create_schema_and_initialise(self):
+        self.execute_sql_file('schema_tables')
+        self._register_layers(tables=True)
+        self.execute_sql_file('initialisation')
+        self.create_perceel_criteriumwaarde_view()
+        self.execute_sql_file('schema_views')
+        self.create_pivot_view()
+        self._register_layers(views=True)
+        self._update_gpkg_ogr_contents_all_layers(tables=True, views=True)
 
     def create_perceel_criteriumwaarde_view(self):
         """Create a view containing, in each row one value for one (numbered) criterium of one parcel"""
@@ -325,7 +329,7 @@ class MCADatabase(Database):
         self.datasource.ExecuteSQL(sql)
         self.register_gpkg_layer(
             layer_name=self.PERCEEL_CRITERIUMWAARDE,
-            geometry_type=self.VIEWS_GEOMETRY_TYPES[self.PERCEEL_CRITERIUMWAARDE]
+            geometry_type=None
         )
         self.update_gpkg_ogr_contents(self.PERCEEL_CRITERIUMWAARDE)
 
@@ -340,15 +344,15 @@ class MCADatabase(Database):
         hoofdonderdeel_lyr = self.datasource.GetLayerByName('hoofdonderdeel')
         # Note: avg() is just a dummy aggregation method; all values that are aggregated here are the same
         for row in criterium_lyr:
-            sql = f"""avg(case when criterium.criterium_id = {row.GetFID()} then criterium.score end) as {row[0]}"""
+            sql = f"""avg(case when criteriumscore.criterium_id = {row.GetFID()} then criteriumscore.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         for row in domein_lyr:
-            sql = f"""avg(case when domein.domein_id = {row.GetFID()} then domein.score end) as {row[0]}"""
+            sql = f"""avg(case when domeinscore.domein_id = {row.GetFID()} then domeinscore.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         for row in hoofdonderdeel_lyr:
-            sql = f"""avg(case when hoofdonderdeel.hoofdonderdeel_id = {row.GetFID()} then hoofdonderdeel.score end) as {row[0]}"""
+            sql = f"""avg(case when hoofdonderdeelscore.hoofdonderdeel_id = {row.GetFID()} then hoofdonderdeelscore.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         select_clauses_str = ', '.join(select_clauses)
@@ -360,7 +364,7 @@ class MCADatabase(Database):
             CREATE VIEW IF NOT EXISTS {self.result_view_name} AS
             SELECT  perceel.*,
                     {select_clauses_str},
-                    eind.score as eindscore
+                    eindscore.score as eindscore
             FROM    perceel
             LEFT JOIN perceel_criteriumscore as criteriumscore
                 ON  perceel.id = criteriumscore.perceel_id
@@ -384,15 +388,25 @@ class MCADatabase(Database):
         self.calculate_layer_extents(layer_name=self.result_view_name)
         self.update_gpkg_ogr_contents(table_name=self.result_view_name)
 
-    def _register_layers(self):
+    def _register_layers(self, tables: bool = False, views: bool = False):
         """Register all layers and views as geopackage layers"""
-        for layer_name, geometry_type in {**self.TABLES_GEOMETRY_TYPES, **self.VIEWS_GEOMETRY_TYPES}.items():
+        geometry_types = dict()
+        if tables:
+            geometry_types.update(self.TABLES_GEOMETRY_TYPES)
+        if views:
+            geometry_types.update(self.VIEWS_GEOMETRY_TYPES)
+        for layer_name, geometry_type in geometry_types.items():
             self.register_gpkg_layer(layer_name=layer_name, geometry_type=geometry_type)
-            self.calculate_layer_extents(layer_name=layer_name)
-        self._update_gpkg_ogr_contents_all_layers()
+            # self.calculate_layer_extents(layer_name=layer_name)
+        self._update_gpkg_ogr_contents_all_layers(tables=tables, views=views)
 
-    def _update_gpkg_ogr_contents_all_layers(self):
-        for layer_name in (self.TABLES + self.VIEWS):
+    def _update_gpkg_ogr_contents_all_layers(self, tables: bool = False, views: bool = False):
+        layer_names = []
+        if tables:
+            layer_names += self.TABLES
+        if views:
+            layer_names += self.VIEWS
+        for layer_name in layer_names:
             self.update_gpkg_ogr_contents(table_name=layer_name)
 
     def initialise(self):
