@@ -10,7 +10,7 @@ SELECT	id,
 		percentage_bebouwing, 
 		verhard_oppervlak, 
 		verhard_percentage,
-		maaiveldhoogte, 
+		maaiveldhoogte,
 		bodemsoort, 
 		doorlatendheid_bodem, 
 		ghg_tov_maaiveld, 
@@ -20,7 +20,7 @@ SELECT	id,
 		kwetsbaarheid_oppervlaktewater, 
 		aantal_keer_verpompen, 
 		afstand_tot_rwzi, 
-		type_gebied,
+		gebiedstype_wateroverlast,
 		geom
 FROM 	kadastraal_perceel_subdivided
 ;

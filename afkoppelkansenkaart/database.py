@@ -25,7 +25,8 @@ class LayerDoesNotExistError(ValueError):
     pass
 
 
-def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name: str = None, geometry_column_name='geom', key_column_name=''):
+def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name: str = None,
+                      geometry_column_name='geom', key_column_name=''):
     if not qgis_layer_name:
         qgis_layer_name = pg_layer_name
     uri = QgsDataSourceUri()
@@ -69,7 +70,7 @@ def get_pscycopg_connection_params(connection_name: str):
     return result
 
 
-def execute_sql_script(connection_name: str, sql_filename: str, feedback, parameters = None):
+def execute_sql_script(connection_name: str, sql_filename: str, feedback, parameters=None):
     sql_file_name = os.path.join(SQL_DIR, f'{sql_filename}.sql')
     with open(sql_file_name, 'r') as sql_file:
         sql = sql_file.read()
@@ -77,6 +78,7 @@ def execute_sql_script(connection_name: str, sql_filename: str, feedback, parame
             sql = sql.format(**parameters)
             feedback.pushInfo(f"New query: {sql}")
         execute_sql_query(connection_name, sql, feedback)
+
 
 def execute_sql_query(connection_name: str, query: str, feedback):
     try:
@@ -266,6 +268,7 @@ class MCADatabase(Database):
     CRITERIUM = 'criterium'
     WEGING = 'weging'
 
+    PERCEEL_CRITERIUMWAARDE = 'perceel_criteriumwaarde'
     PERCEEL_CRITERIUMSCORE = 'perceel_criteriumscore'
     PERCEEL_DOMEINSCORE = 'perceel_domeinscore'
     PERCEEL_HOOFDONDERDEELSCORE = 'perceel_hoofdonderdeelscore'
@@ -285,6 +288,7 @@ class MCADatabase(Database):
     }
 
     VIEWS_GEOMETRY_TYPES = {
+        PERCEEL_CRITERIUMWAARDE: None,
         PERCEEL_CRITERIUMSCORE: None,
         PERCEEL_DOMEINSCORE: None,
         PERCEEL_HOOFDONDERDEELSCORE: None,
@@ -304,6 +308,27 @@ class MCADatabase(Database):
         self.execute_sql_file('schema')
         self._register_layers()
 
+    def create_perceel_criteriumwaarde_view(self):
+        """Create a view containing, in each row one value for one (numbered) criterium of one parcel"""
+        sql = f"DROP VIEW IF EXISTS perceel_criteriumwaarde;"
+        self.datasource.ExecuteSQL(sql)
+        select_clauses = []
+        criterium_lyr = self.datasource.GetLayerByName('criterium')
+        for criterium in criterium_lyr:
+            select = f"SELECT   id AS perceel_id, " \
+                     f"         {criterium.GetFID()} AS criterium_id," \
+                     f"         CAST({criterium[0]} AS TEXT) AS waarde " \
+                     f"FROM     perceel"
+            select_clauses.append(select)
+        select_str = " UNION ".join(select_clauses)
+        sql = f"CREATE VIEW perceel_criteriumwaarde AS {select_str};"
+        self.datasource.ExecuteSQL(sql)
+        self.register_gpkg_layer(
+            layer_name=self.PERCEEL_CRITERIUMWAARDE,
+            geometry_type=self.VIEWS_GEOMETRY_TYPES[self.PERCEEL_CRITERIUMWAARDE]
+        )
+        self.update_gpkg_ogr_contents(self.PERCEEL_CRITERIUMWAARDE)
+
     def create_pivot_view(self):
         """Create a view containing one row for each perceel.
         Fields are all original perceel attributes plus all the scores as columns
@@ -313,16 +338,17 @@ class MCADatabase(Database):
         criterium_lyr = self.datasource.GetLayerByName('criterium')
         domein_lyr = self.datasource.GetLayerByName('domein')
         hoofdonderdeel_lyr = self.datasource.GetLayerByName('hoofdonderdeel')
+        # Note: avg() is just a dummy aggregation method; all values that are aggregated here are the same
         for row in criterium_lyr:
-            sql = f"""sum(case when criterium.criterium_id = {row.GetFID()} then criterium.score end) as {row[0]}"""
+            sql = f"""avg(case when criterium.criterium_id = {row.GetFID()} then criterium.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         for row in domein_lyr:
-            sql = f"""sum(case when domein.domein_id = {row.GetFID()} then domein.score end) as {row[0]}"""
+            sql = f"""avg(case when domein.domein_id = {row.GetFID()} then domein.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         for row in hoofdonderdeel_lyr:
-            sql = f"""sum(case when hoofdonderdeel.hoofdonderdeel_id = {row.GetFID()} then hoofdonderdeel.score end) as {row[0]}"""
+            sql = f"""avg(case when hoofdonderdeel.hoofdonderdeel_id = {row.GetFID()} then hoofdonderdeel.score end) as {row[0]}"""
             select_clauses.append(sql)
 
         select_clauses_str = ', '.join(select_clauses)
@@ -336,14 +362,21 @@ class MCADatabase(Database):
                     {select_clauses_str},
                     eind.score as eindscore
             FROM    perceel
-            LEFT JOIN perceel_criteriumscore as criterium
-                ON  perceel.id = criterium.criterium_id
-            LEFT JOIN perceel_domeinscore as domein
-                ON  perceel.id = domein.perceel_id
-            LEFT JOIN perceel_hoofdonderdeelscore as hoofdonderdeel
-                ON  perceel.id = hoofdonderdeel.perceel_id
-            LEFT JOIN perceel_eindscore AS eind
-                ON  perceel.id = eind.perceel_id
+            LEFT JOIN perceel_criteriumscore as criteriumscore
+                ON  perceel.id = criteriumscore.perceel_id
+            JOIN criterium 
+                ON criteriumscore.criterium_id = criterium.id
+            LEFT JOIN perceel_domeinscore as domeinscore
+                ON  perceel.id = domeinscore.perceel_id
+                    AND criterium.domein_id = domeinscore.domein_id
+            JOIN domein
+                ON domeinscore.domein_id = domein.id 
+            LEFT JOIN perceel_hoofdonderdeelscore as hoofdonderdeelscore
+                ON  perceel.id = hoofdonderdeelscore.perceel_id
+                    AND domein.hoofdonderdeel_id = hoofdonderdeelscore.hoofdonderdeel_id
+            LEFT JOIN perceel_eindscore AS eindscore
+                ON  perceel.id = eindscore.perceel_id
+            GROUP BY perceel.id
             ;
         """
         self.datasource.ExecuteSQL(sql)
@@ -370,7 +403,3 @@ class MCADatabase(Database):
 class AfkoppelKansenKaartDatabase(MCADatabase):
     def __init__(self):
         super().__init__(result_view_name='afkoppelkansenkaart')
-
-
-
-
