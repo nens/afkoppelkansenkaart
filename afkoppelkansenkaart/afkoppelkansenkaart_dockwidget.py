@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(__file__))
 
 import db_manager.db_plugins.postgis.connector as con
 from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtWidgets import QProgressBar, QFileDialog
+from qgis.PyQt.QtWidgets import QApplication, QProgressBar, QFileDialog
 from qgis.PyQt.QtCore import pyqtSignal, QSettings
 from qgis.core import (
     NULL,
@@ -50,7 +50,7 @@ from qgis.core import QgsProcessingProvider
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'afkoppelkansenkaart_dockwidget_base.ui'))
-
+STYLE_DIR = Path(__file__).parent / "style"
 
 class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     closingPlugin=pyqtSignal()
@@ -69,6 +69,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         
         self.pushButton_Nieuw.clicked.connect(self.nieuw_clicked)
         self.pushButton_Open.clicked.connect(self.open_clicked)
+        self.pushButton_Verwerk.clicked.connect(self.verwerk_clicked)
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
         self.comboBox_PostGISDatabases.currentIndexChanged.connect(self.update_postgis_connection_status)
         self.populate_combobox_postgis_databases()
@@ -101,14 +102,14 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
-        result = root.findGroup('Afkoppelkansenkaart')
+        result = root.findGroup('Afkoppelrendementskaart')
         if not result:
-            result = root.insertGroup(0, 'Afkoppelkansenkaart')
+            result = root.insertGroup(0, 'Afkoppelrendementskaart')
         return result
 
     def add_to_layer_tree_group(self, layer):
         """
-        Add a layer to the Afkoppelkansenkaart layer tree group
+        Add a layer to the Afkoppelrendementskaart layer tree group
         """
         project = QgsProject.instance()
         project.addMapLayer(layer, addToLegend=False)
@@ -141,11 +142,11 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.update_bewerking(0)
 
     def nieuw_clicked(self):
-        filename, _ = QFileDialog.getSaveFileName(self, "Nieuwe afkoppelkansenkaart", "", "GeoPackage (*.gpkg)")
+        filename, _ = QFileDialog.getSaveFileName(self, "Nieuwe afkoppelrendementskaart", "", "GeoPackage (*.gpkg)")
         if filename:
             iface.messageBar().pushMessage(
                 MESSAGE_CATEGORY,
-                f"Afkoppelkansenkaart geopackage aangemaakt! ({filename})",
+                f"Afkoppelrendementskaart geopackage aangemaakt! ({filename})",
                 level=Qgis.Success,
                 duration=10
             )
@@ -153,40 +154,73 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             self.db.create_datasource(filename)
             self.db.epsg = 28992
             self.db.create_schema_and_initialise()
-            self.add_afkoppelkansenkaart_layer()
+            self.add_layers_to_project()
             self.check_bewerkingen_ui()
 
     def open_clicked(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Nieuwe afkoppelkansenkaart", "", "GeoPackage (*.gpkg)")
+        filename, _ = QFileDialog.getOpenFileName(self, "Open afkoppelrendementskaart", "", "GeoPackage (*.gpkg)")
         if filename:
             if self.db:
                 if filename == self.db.gpkg_path:
                     iface.messageBar().pushMessage(
                         MESSAGE_CATEGORY,
-                        f"Deze afkoppelkansenkaart was reeds geopend. ({filename})",
+                        f"Deze afkoppelrendementskaart was reeds geopend. ({filename})",
                         level=Qgis.Info,
                         duration=10
                     )
                     return
             self.db = AfkoppelKansenKaartDatabase()
             self.db.set_datasource(filename)
+            self.db.epsg = 28992
             iface.messageBar().pushMessage(
                 MESSAGE_CATEGORY,
-                f"Afkoppelkansenkaart geopend. ({filename})",
+                f"Afkoppelrendementskaart geopend. ({filename})",
                 level=Qgis.Info,
                 duration=10
             )
-            self.add_afkoppelkansenkaart_layer()
+            self.add_layers_to_project()
             self.check_bewerkingen_ui()
 
-    def add_afkoppelkansenkaart_layer(self):
-        if self.db.gpkg_path:
-            layer = QgsVectorLayer(str(self.db.gpkg_path) + "|layername=afkoppelkansenkaart", "Afkoppelkansenkaart")
-            self.add_to_layer_tree_group(layer=layer)
+    def verwerk_clicked(self):
+        if self.db:
+            iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                f"Wijzigingen verwerken... (dit kan enkele minuten duren)",
+                level=Qgis.Info,
+                duration=0
+            )
+            QApplication.processEvents()
+            self.db.process_changes()
+            iface.messageBar().clearWidgets()
+            iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                f"Wijzigingen verwerkt!",
+                level=Qgis.Success,
+                duration=3
+            )
         else:
             iface.messageBar().pushMessage(
                 MESSAGE_CATEGORY,
-                "Laad eerst een afkoppelkansenkaart in",
+                f"Open eerst een afkoppelrendementskaart geopackage!",
+                level=Qgis.Warning,
+                duration=10
+            )
+
+
+    def add_layers_to_project(self):
+        if self.db.gpkg_path:
+            for sub_group in LAYERS_TO_LOAD.values():
+                for layer_name in sub_group:
+                    layer = QgsVectorLayer(
+                        str(self.db.gpkg_path) + f"|layername={layer_name}",
+                        layer_name.replace("_", " ").capitalize()
+                    )
+                    layer.loadNamedStyle(str(STYLE_DIR / f"{layer_name}.qml"))
+                    self.add_to_layer_tree_group(layer=layer)
+        else:
+            iface.messageBar().pushMessage(
+                MESSAGE_CATEGORY,
+                "Laad eerst een afkoppelrendementskaart in",
                 level=Qgis.Info,
                 duration=3
             )

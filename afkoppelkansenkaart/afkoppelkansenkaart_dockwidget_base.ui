@@ -98,11 +98,14 @@
            <string notr="true">color: rgb(170, 255, 255);</string>
           </property>
           <property name="title">
-           <string>Afkoppelrendementskaart</string>
+           <string>Geopackage</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
             <widget class="QPushButton" name="pushButton_Nieuw">
+             <property name="toolTip">
+              <string>Maak een nieuwe afkoppelrendementskaart geopackage aan</string>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(170, 255, 255);
 color: rgb(0, 0, 0);</string>
@@ -114,12 +117,29 @@ color: rgb(0, 0, 0);</string>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_Open">
+             <property name="toolTip">
+              <string>Open een bestaande afkoppelrendementskaart geopackage</string>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(170, 255, 255);
 color: rgb(0, 0, 0);</string>
              </property>
              <property name="text">
               <string>Open...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_Verwerk">
+             <property name="toolTip">
+              <string>Genereer resultaten opnieuw na aanpassingen aan de criteria, weging, buurten en wijken</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(170, 255, 255);
+color: rgb(0, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>Verwerk aanpassingen</string>
              </property>
             </widget>
            </item>
@@ -188,12 +208,12 @@ color: rgb(0, 0, 0);</string>
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;color: rgb(170, 255, 255)}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}</string>
+           <string notr="true">QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;color: rgb(170, 255, 255)}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}QgsCollapsibleGroupBoxBasic::title, QgsCollapsibleGroupBox::title {  subcontrol-origin: margin;  subcontrol-position: top left;  margin-left: 20px;  margin-right: 5px;  left: 0px;  top: 1px;}</string>
           </property>
           <property name="title">
            <string>PostGIS Database</string>
           </property>
-          <property name="collapsed" stdset="0">
+          <property name="collapsed">
            <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -218,6 +238,9 @@ color: rgb(0, 0, 0);</string>
                  <width>30</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string>Ververs de lijst met PostGIS databases</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(170, 255, 255);
@@ -275,12 +298,15 @@ color: rgb(0, 0, 0);</string>
                  <height>28</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>Laad de 'perceel'-laag uit de PostGIS database (opnieuw) in</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(170, 255, 255);
 color: rgb(0, 0, 0);</string>
                </property>
                <property name="text">
-                <string>Reload</string>
+                <string>Ververs</string>
                </property>
               </widget>
              </item>
@@ -349,6 +375,9 @@ color: rgb(0, 0, 0);</string>
                 <font>
                  <pointsize>14</pointsize>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>Voer de geselecteerde bewerking uit</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">:enabled{background-color: rgb(170, 255, 255)}

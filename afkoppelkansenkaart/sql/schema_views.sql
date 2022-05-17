@@ -1,6 +1,13 @@
 -- The views defined below depend on a view perceel_criteriumwaarde, which is dynamically created in a python function based on
 -- the contents of the table 'criterium'. So first run schema_tables.sql, initialisation.sql, and
 -- create_perceel_criteriumwaarde_view() before running the sql below
+DROP VIEW IF EXISTS perceel_criteriumscore;
+DROP VIEW IF EXISTS perceel_domeinscore;
+DROP VIEW IF EXISTS perceel_hoofdonderdeelscore;
+DROP VIEW IF EXISTS perceel_eindscore;
+DROP VIEW IF EXISTS buurt_eindscore;
+DROP VIEW IF EXISTS wijk_eindscore;
+
 
 CREATE VIEW IF NOT EXISTS perceel_criteriumscore AS
 SELECT  row_number() over() as id,
@@ -63,7 +70,7 @@ GROUP BY phs.perceel_id
 
 CREATE VIEW IF NOT EXISTS buurt_eindscore AS
 SELECT  buurt.*,
-        ROUND(SUM(ST_Area(perceel.geom) * eind.score) / SUM(ST_Area(perceel.geom)), 3) as gemiddelde_eindscore
+        ROUND(SUM(oppervlakte_perceel * eind.score) / SUM(oppervlakte_perceel), 3) as gemiddelde_eindscore
 FROM    buurt
 LEFT JOIN perceel
     ON  ST_Intersects(perceel.geom, buurt.geom)
@@ -74,7 +81,7 @@ GROUP BY buurt.naam
 
 CREATE VIEW IF NOT EXISTS wijk_eindscore AS
 SELECT  wijk.*,
-        ROUND(SUM(ST_Area(perceel.geom) * eind.score) / SUM(ST_Area(perceel.geom)), 3) as gemiddelde_eindscore
+        ROUND(SUM(oppervlakte_perceel * eind.score) / SUM(oppervlakte_perceel), 3) as gemiddelde_eindscore
 FROM    wijk
 LEFT JOIN perceel
     ON  ST_Intersects(perceel.geom, wijk.geom)

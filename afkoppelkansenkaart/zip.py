@@ -20,7 +20,9 @@ ROOT_DIR_FILES = [
 
 DIRECTORIES = [
     'processing',
-    'sql'
+    'sql',
+    'style'
+
 ]
 
 

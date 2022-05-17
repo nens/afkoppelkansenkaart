@@ -133,8 +133,38 @@ class Database:
             self.gpkg_path = path.absolute()
             self.datasource = ogr.Open(str(filename), update=1)
 
+    @staticmethod
+    def load_spatialite(con):
+        """Load spatialite extension as described in
+        https://geoalchemy-2.readthedocs.io/en/latest/spatialite_tutorial.html"""
+
+        con.enable_load_extension(True)
+        cur = con.cursor()
+        libs = [
+            # SpatiaLite >= 4.2 and Sqlite >= 3.7.17, should work on all platforms
+            ("mod_spatialite", "sqlite3_modspatialite_init"),
+            # SpatiaLite >= 4.2 and Sqlite < 3.7.17 (Travis)
+            ("mod_spatialite.so", "sqlite3_modspatialite_init"),
+            # SpatiaLite < 4.2 (linux)
+            ("libspatialite.so", "sqlite3_extension_init"),
+        ]
+        found = False
+        for lib, entry_point in libs:
+            try:
+                cur.execute("select load_extension('{}', '{}')".format(lib, entry_point))
+            except sqlite3.OperationalError:
+                continue
+            else:
+                found = True
+                break
+        if not found:
+            raise RuntimeError("Cannot find any suitable spatialite module")
+        cur.close()
+        con.enable_load_extension(False)
+
     def execute_sql_file(self, basename):
         conn = sqlite3.connect(self.gpkg_path)
+        self.load_spatialite(conn)
         cur = conn.cursor()
 
         sql_fn = SQL_DIR / str(basename + '.sql')
@@ -276,6 +306,10 @@ class MCADatabase(Database):
     BUURT_EINDSCORE = 'buurt_eindscore'
     WIJK_EINDSCORE = 'wijk_eindscore'
 
+    RESULTAAT_AFKOPPELRENDEMENTSKAART = "resultaat_afkoppelrendementskaart"
+    RESULTAAT_BUURT_EINDSCORE = "resultaat_buurt_eindscore"
+    RESULTAAT_WIJK_EINDSCORE = "resultaat_wijk_eindscore"
+
     TABLES_GEOMETRY_TYPES = {
         PERCEEL: MULTIPOLYGON,
         BUURT: MULTIPOLYGON,
@@ -295,8 +329,15 @@ class MCADatabase(Database):
         WIJK_EINDSCORE: MULTIPOLYGON
     }
 
+    RESULT_TABLES_GEOMETRY_TYPES = {
+        RESULTAAT_AFKOPPELRENDEMENTSKAART: MULTIPOLYGON,
+        RESULTAAT_BUURT_EINDSCORE: MULTIPOLYGON,
+        RESULTAAT_WIJK_EINDSCORE: MULTIPOLYGON
+    }
+
     TABLES = list(TABLES_GEOMETRY_TYPES.keys())
     VIEWS = list(VIEWS_GEOMETRY_TYPES.keys())
+    RESULT_TABLES = list(RESULT_TABLES_GEOMETRY_TYPES.keys())
 
     def __init__(self, result_view_name: str):
         super().__init__()
@@ -306,11 +347,16 @@ class MCADatabase(Database):
         self.execute_sql_file('schema_tables')
         self._register_layers(tables=True)
         self.execute_sql_file('initialisation')
+        self._update_gpkg_ogr_contents_all_layers(tables=True)
+        self.process_changes()
+
+    def process_changes(self):
         self.create_perceel_criteriumwaarde_view()
         self.execute_sql_file('schema_views')
         self.create_pivot_view()
-        self._register_layers(views=True)
-        self._update_gpkg_ogr_contents_all_layers(tables=True, views=True)
+        self.execute_sql_file('result_tables')
+        self._register_layers(views=True, result_tables=True)
+        self._update_gpkg_ogr_contents_all_layers(views=True, result_tables=True)
 
     def create_perceel_criteriumwaarde_view(self):
         """Create a view containing, in each row one value for one (numbered) criterium of one parcel"""
@@ -357,8 +403,8 @@ class MCADatabase(Database):
 
         select_clauses_str = ', '.join(select_clauses)
 
-        # sql = f"""DROP VIEW IF EXISTS {self.result_view_name};"""
-        # self.datasource.ExecuteSQL(sql)
+        sql = f"""DROP VIEW IF EXISTS {self.result_view_name};"""
+        self.datasource.ExecuteSQL(sql)
 
         sql = f"""
             CREATE VIEW IF NOT EXISTS {self.result_view_name} AS
@@ -388,24 +434,34 @@ class MCADatabase(Database):
         self.calculate_layer_extents(layer_name=self.result_view_name)
         self.update_gpkg_ogr_contents(table_name=self.result_view_name)
 
-    def _register_layers(self, tables: bool = False, views: bool = False):
+    def _register_layers(self, tables: bool = False, views: bool = False, result_tables: bool = False):
         """Register all layers and views as geopackage layers"""
         geometry_types = dict()
         if tables:
             geometry_types.update(self.TABLES_GEOMETRY_TYPES)
         if views:
             geometry_types.update(self.VIEWS_GEOMETRY_TYPES)
+        if result_tables:
+            geometry_types.update(self.RESULT_TABLES_GEOMETRY_TYPES)
         for layer_name, geometry_type in geometry_types.items():
             self.register_gpkg_layer(layer_name=layer_name, geometry_type=geometry_type)
             # self.calculate_layer_extents(layer_name=layer_name)
-        self._update_gpkg_ogr_contents_all_layers(tables=tables, views=views)
+        self._update_gpkg_ogr_contents_all_layers(tables=tables, views=views, result_tables=result_tables)
 
-    def _update_gpkg_ogr_contents_all_layers(self, tables: bool = False, views: bool = False):
+    def _update_gpkg_ogr_contents_all_layers(
+            self,
+            tables: bool = False,
+            views: bool = False,
+            result_tables: bool = False
+    ):
         layer_names = []
         if tables:
             layer_names += self.TABLES
         if views:
             layer_names += self.VIEWS
+        if result_tables:
+            layer_names += self.RESULT_TABLES
+
         for layer_name in layer_names:
             self.update_gpkg_ogr_contents(table_name=layer_name)
 
