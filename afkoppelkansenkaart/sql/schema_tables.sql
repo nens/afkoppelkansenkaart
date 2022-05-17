@@ -37,7 +37,7 @@ CREATE TABLE perceel (
 CREATE TABLE buurt (
 	id integer primary key autoincrement,
 	code text,
-	naam text,
+	naam text UNIQUE NOT NULL,
 	aantal_inwoners integer,
 	geom MULTIPOLYGON
 )
@@ -46,7 +46,7 @@ CREATE TABLE buurt (
 CREATE TABLE wijk (
 	id integer primary key autoincrement,
 	code text,
-	naam text,
+	naam text UNIQUE NOT NULL,
 	aantal_inwoners integer,
 	geom MULTIPOLYGON
 )

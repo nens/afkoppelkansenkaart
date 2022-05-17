@@ -3,7 +3,7 @@ ALTER TABLE kadastraal_perceel_subdivided ADD COLUMN IF NOT EXISTS afstand_tot_b
 with perc_berging_koppeling AS (
 	SELECT DISTINCT ON (perc.id) 
 			perc.id as perceel_id, 
-			ST_Distance(perc.geom, berg.geom) as afstand,
+			coalesce(ST_Distance(perc.geom, berg.geom), 9999) as afstand,
 			perc.maaiveldhoogte as perceel_maaiveldhoogte, 
 			berg.id as bergings_id,
 			berg.hoogte_median as berging_hoogte,

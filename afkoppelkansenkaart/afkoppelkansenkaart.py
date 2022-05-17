@@ -59,7 +59,7 @@ class AfkoppelKansenKaart:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'AfkoppelKansenKaart_{}.qm'.format(locale))
+            'Afkoppelrendementskaart_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -68,10 +68,10 @@ class AfkoppelKansenKaart:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&AfkoppelKansenKaart')
+        self.menu = self.tr(u'&Afkoppelrendementskaart')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'AfkoppelKansenKaart')
-        self.toolbar.setObjectName(u'AfkoppelKansenKaart')
+        self.toolbar = self.iface.addToolBar(u'Afkoppelrendementskaart')
+        self.toolbar.setObjectName(u'Afkoppelrendementskaart')
 
         self.pluginIsActive = False
         self.dockwidget = None
@@ -93,7 +93,7 @@ class AfkoppelKansenKaart:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('AfkoppelKansenKaart', message)
+        return QCoreApplication.translate('Afkoppelrendementskaart', message)
 
 
     def add_action(
@@ -180,7 +180,7 @@ class AfkoppelKansenKaart:
         icon_path = ':/plugins/afkoppelkansenkaart/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'AfkoppelKansenKaart'),
+            text=self.tr(u'Afkoppelrendementskaart'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -210,7 +210,7 @@ class AfkoppelKansenKaart:
 
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&AfkoppelKansenKaart'),
+                self.tr(u'&Afkoppelrendementskaart'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar

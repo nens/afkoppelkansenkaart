@@ -77,7 +77,7 @@ VALUES  (1,'Nagenoeg volledig onverhard',   1,0,25,3),
         (4,'Goed',                          3,0.5,1,2),
         (4,'Zeer goed',                     4,1,9999,3),
 
-        (5,'Naastgelegen',                  1,0,10.0,3),
+        (5,'Naastgelegen',                  1,-9999,10.0,3),
         (5,'Enige afstand',                 2,10.0,50.0,2),
         (5,'Ver weg',                       3,50.0,100,1),
         (5,'Geen lagergelegen bergingslocatie',4,100,9999,0),
