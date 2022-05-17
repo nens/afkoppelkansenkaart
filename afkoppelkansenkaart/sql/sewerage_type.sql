@@ -54,4 +54,6 @@ FROM 	type_rioolstelsel_per_perceel AS src
 WHERE 	tgt.id = src.id
 ;
 
+UPDATE kadastraal_perceel_subdivided SET type_rioolstelsel = 6 WHERE type_rioolstelsel IS NULL;
+
 DROP TABLE IF EXISTS bgt_vlakken_merged;
