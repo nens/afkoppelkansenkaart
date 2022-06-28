@@ -44,7 +44,6 @@ def get_postgis_layer(connection_name: str, pg_layer_name: str, qgis_layer_name:
         aGeometryColumn=geometry_column_name,
         aKeyColumn=key_column_name
     )
-
     layer = QgsVectorLayer(uri.uri(), qgis_layer_name, "postgres")
     return layer
 
@@ -65,8 +64,11 @@ def get_pscycopg_connection_params(connection_name: str):
         auth_method_config = QgsAuthMethodConfig()
         auth_mgr.loadAuthenticationConfig(authcfg, auth_method_config, True)
         config_map = auth_method_config.configMap()
-        result['user'] = config_map['username']
-        result['password'] = config_map['password']
+        try:
+            result['user'] = config_map['username']
+            result['password'] = config_map['password']
+        except KeyError:
+            pass
     return result
 
 

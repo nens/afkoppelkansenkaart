@@ -26,7 +26,6 @@ import os
 import sys
 sys.path.append(os.path.dirname(__file__))
 
-import db_manager.db_plugins.postgis.connector as con
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtWidgets import QApplication, QProgressBar, QFileDialog
 from qgis.PyQt.QtCore import pyqtSignal, QSettings
@@ -46,24 +45,25 @@ import psycopg2
 
 from .constants import *
 from afkoppelkansenkaart.database import *
-from qgis.core import QgsProcessingProvider
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'afkoppelkansenkaart_dockwidget_base.ui'))
 STYLE_DIR = Path(__file__).parent / "style"
 
+
 class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     closingPlugin=pyqtSignal()
     
-    def __init__(self,parent, provider):
+    def __init__(self, parent, provider):
         """Constructor."""
         super(AfkoppelKansenKaartDockWidget,self).__init__(parent)
-
+        self.provider = provider
         try:
-            self._parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_WFS_LAYER_NAME)[0].id()
+            self._wfs_parcel_layer_id = QgsProject.instance().mapLayersByName(PARCEL_WFS_LAYER_NAME)[0].id()
         except IndexError:  # No layer of that name exists:
-            self._parcel_layer_id = None
+            self._wfs_parcel_layer_id = None
         self.db = None
+        self.postgis_parcel_source_layer_id = None
 
         self.setupUi(self)
         
@@ -73,8 +73,9 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         self.pushButton_PercelenWFS.clicked.connect(self.add_parcel_wfs)
         self.comboBox_PostGISDatabases.currentIndexChanged.connect(self.update_postgis_connection_status)
         self.populate_combobox_postgis_databases()
+        self.update_postgis_connection_status()
         self.pushButton_Play.clicked.connect(self.play_clicked)
-        self.populate_combobox_bewerkingen(provider.algorithms())
+        self.populate_combobox_bewerkingen(self.provider.algorithms())
         self.comboBox_Bewerkingen.currentIndexChanged.connect(self.update_bewerking)
         self.pushButton_reload.clicked.connect(self.reload_db)
         self.pushButton_refresh.clicked.connect(self.populate_combobox_postgis_databases)
@@ -89,15 +90,15 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         return self.comboBox_PostGISDatabases.currentText()
 
     @property
-    def parcel_layer_id(self):
-        if QgsProject.instance().mapLayer(self._parcel_layer_id):
-            return self._parcel_layer_id
+    def wfs_parcel_layer_id(self):
+        if QgsProject.instance().mapLayer(self._wfs_parcel_layer_id):
+            return self._wfs_parcel_layer_id
         else:
             return None
 
-    @parcel_layer_id.setter
-    def parcel_layer_id(self, id: str):
-        self._parcel_layer_id = id
+    @wfs_parcel_layer_id.setter
+    def wfs_parcel_layer_id(self, id: str):
+        self._wfs_parcel_layer_id = id
 
     @property
     def layer_group(self):
@@ -133,12 +134,16 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         )
 
     def populate_combobox_bewerkingen(self, algos):
-        
+        self.comboBox_Bewerkingen.clear()
         # sort by order
         sorted_algo_list = sorted(algos, key=lambda x: x.order, reverse=False)
         for i, algo in enumerate(sorted_algo_list):
             self.comboBox_Bewerkingen.addItem(f'{1+i}. {algo.displayName()}', algo)
-            
+            enable = True
+            if (algo.REQUIRES_WFS_PARCELS_LAYER and not self.wfs_parcel_layer_id) or \
+                    (algo.REQUIRES_POSTGIS_PARCELS_LAYER and not self.postgis_parcel_source_layer_id):
+                enable = False
+            self.comboBox_Bewerkingen.model().item(i).setEnabled(enable)
         self.update_bewerking(0)
 
     def nieuw_clicked(self):
@@ -229,7 +234,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
 
         # Run the selected Processor
         algo_name = self.comboBox_Bewerkingen.currentData().name()
-        algo = f'Afkoppelkansenkaart:{algo_name}'
+        algo = f'Afkoppelrendementskaart:{algo_name}'
         params = {}  # A dictionary to load some default value in the algo
         run_silent = False
 
@@ -248,7 +253,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             params['INPUT_DB'] = self.connection_name
         elif algo_name is "parceltopostgis":
             params['INPUT_DB'] = self.connection_name
-            params['INPUT_POL'] = self.parcel_layer_id
+            params['INPUT_POL'] = self.wfs_parcel_layer_id
             run_silent = True
         elif algo_name is "percentagecultivation":
             params['INPUT_DB'] = self.connection_name
@@ -316,6 +321,7 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
             processing.run(algo, params)
         else:
             processing.execAlgorithmDialog(algo, params)
+        self.populate_combobox_bewerkingen(self.provider.algorithms())
         
     def reload_db(self):
         iface.messageBar().pushMessage(
@@ -327,18 +333,18 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
         postgis_parcel_source_layer = get_postgis_layer(
             self.connection_name,
              'kadastraal_perceel_subdivided',
-             qgis_layer_name = PARCEL_POSTGIS_LAYER_NAME
+             qgis_layer_name=PARCEL_POSTGIS_LAYER_NAME
         )
         self.postgis_parcel_source_layer_id = postgis_parcel_source_layer.id()
         self.add_to_layer_tree_group(postgis_parcel_source_layer)
         self.check_bewerkingen_ui()
 
     def add_parcel_wfs(self):
-        if self.parcel_layer_id:
-            QgsProject.instance().removeMapLayer(self.parcel_layer_id)
+        if self.wfs_parcel_layer_id:
+            QgsProject.instance().removeMapLayer(self.wfs_parcel_layer_id)
         vlayer = QgsVectorLayer(PARCELS_WFS_URL, PARCEL_WFS_LAYER_NAME, "WFS")
         self.add_to_layer_tree_group(vlayer)
-        self.parcel_layer_id = vlayer.id()
+        self.wfs_parcel_layer_id = vlayer.id()
         self.check_bewerkingen_ui()
 
     def postgis_connection_is_valid(self):
@@ -352,16 +358,22 @@ class AfkoppelKansenKaartDockWidget(QtWidgets.QDockWidget,FORM_CLASS):
     def update_postgis_connection_status(self):
         if self.postgis_connection_is_valid():
             self.label_StatusValue.setText('Database ready')
+            self.pushButton_reload.setEnabled(True)
         else:
             self.label_StatusValue.setText('Invalid connection details')
-            
+            self.pushButton_reload.setEnabled(False)
+
     def update_bewerking(self, idx):
-        self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())
+        try:
+            self.textField_Uitleg.setPlainText(self.comboBox_Bewerkingen.currentData().shortHelpString())
+        except AttributeError:
+            pass
 
     def check_bewerkingen_ui(self):
-        complete = self.postgis_connection_is_valid() and self.parcel_layer_id is not None
+        complete = self.postgis_connection_is_valid()
         self.groupBox_ConnectedSurfaces.setEnabled(complete)
         if not complete:
             self.groupBox_ConnectedSurfaces.setToolTip(self.tr("Selecteer een database en importeer percelen"))
         else:
             self.groupBox_ConnectedSurfaces.setToolTip(self.tr("Selecteer een bewerking"))
+        self.populate_combobox_bewerkingen(self.provider.algorithms())

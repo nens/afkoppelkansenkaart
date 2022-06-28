@@ -69,7 +69,6 @@ class AfkoppelKansenKaart:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Afkoppelrendementskaart')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'Afkoppelrendementskaart')
         self.toolbar.setObjectName(u'Afkoppelrendementskaart')
 

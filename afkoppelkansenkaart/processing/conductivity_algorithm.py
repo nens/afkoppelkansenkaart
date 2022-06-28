@@ -50,6 +50,9 @@ class CalculateConductivityAlgorithm(OrderedProcessingAlgorithm):
     INPUT_POL = "INPUT_POL"
     INPUT_DB = "INPUT_DB"
 
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
+
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along

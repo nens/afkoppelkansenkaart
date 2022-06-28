@@ -6,7 +6,7 @@
 name=Afkoppelrendementskaart
 qgisMinimumVersion=3.16
 description=Bepaal de effectiviteit en kansrijkheid van het afkoppelen van de riolering
-version=1.0
+version=1.0.2
 author=Nelen & Schuurmans
 email=info@nelen-schuurmans.nl
 

@@ -48,6 +48,8 @@ class Parcels2GeoPackageAlgorithm(OrderedProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT_FILE = "INPUT_FILE"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
 
     def initAlgorithm(self, config):
         """
@@ -103,7 +105,7 @@ class Parcels2GeoPackageAlgorithm(OrderedProcessingAlgorithm):
         # this rules out the possibility of using native:package, native:savefeatures, gdal:convertformat
         # https://gis.stackexchange.com/questions/285346/adding-layers-to-geopackage-using-pyqgis
 
-        export_layer = QgsVectorLayer(file_name + "|layername=perceel", "Afkoppelkansenkaart")
+        export_layer = QgsVectorLayer(file_name + "|layername=perceel", "Afkoppelrendementskaart")
         if not export_layer.isValid():
             feedback.pushInfo("Laag niet valide")
             return {self.OUTPUT: success}

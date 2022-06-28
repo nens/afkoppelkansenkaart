@@ -35,7 +35,7 @@ from ..database import execute_sql_script
 from ..constants import *
 from afkoppelkansenkaart.processing.ordered_processing_algorithm import OrderedProcessingAlgorithm
 
-class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
+class PercentageBuiltUpAlgorithm(OrderedProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
@@ -43,6 +43,8 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
 
     OUTPUT = "OUTPUT"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
 
     def initAlgorithm(self, config):
         """
@@ -100,4 +102,4 @@ class PercentageCultivationAlgorithm(OrderedProcessingAlgorithm):
         return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
-        return PercentageCultivationAlgorithm()
+        return PercentageBuiltUpAlgorithm()

@@ -43,6 +43,8 @@ class TransferSewerageTypeAlgorithm(OrderedProcessingAlgorithm):
 
     OUTPUT = "OUTPUT"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
 
     def initAlgorithm(self, config):
         """

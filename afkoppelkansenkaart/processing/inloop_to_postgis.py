@@ -49,6 +49,8 @@ class Inloop2PostGISAlgorithm(OrderedProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT_POL = "INPUT_POL"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = False
 
     def initAlgorithm(self, config):
         """

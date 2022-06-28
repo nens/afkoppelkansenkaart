@@ -45,6 +45,8 @@ class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
 
     OUTPUT = "OUTPUT"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = False
 
     def initAlgorithm(self, config):
         """
@@ -71,7 +73,6 @@ class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
         connection_name = self.parameterAsConnectionName(
             parameters, self.INPUT_DB, context
         )
-
 
         success = False
 
@@ -125,7 +126,7 @@ class PotentialStorageLocationAlgorithm(OrderedProcessingAlgorithm):
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
-        _layer_group = root.findGroup('Afkoppelkansenkaart')
+        _layer_group = root.findGroup('Afkoppelrendementskaart')
         if not _layer_group:
-            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
+            _layer_group = root.insertGroup(0, 'Afkoppelrendementskaart')
         return _layer_group

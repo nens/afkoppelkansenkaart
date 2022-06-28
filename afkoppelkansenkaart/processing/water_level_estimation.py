@@ -49,6 +49,8 @@ class WaterLevelEstimatorAlgorithm(OrderedProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT_DEM = "INPUT_DEM"
     INPUT_POL = "INPUT_POL"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
 
     def initAlgorithm(self, config):
         """

@@ -189,7 +189,7 @@ SELECT 	row_number() over() AS id,
         NULL::TEXT kwetsbaarheid_oppervlaktewater,
         NULL::INTEGER aantal_keer_verpompen,
         NULL::TEXT afstand_tot_rwzi,
-        NULL::TEXT type_gebied,
+        NULL::TEXT gebiedstype_wateroverlast,
 		ST_Force3D(ST_Multi(ST_Buffer(nw.geom,0)))::geometry(MultiPolygonZ, 28992) as geom
 FROM 	kadastraal_perceel AS ori
 JOIN	all_ids_and_geoms AS nw

@@ -52,6 +52,8 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT_POL = "INPUT_POL"
     INPUT_DB = "INPUT_DB"
+    REQUIRES_WFS_PARCELS_LAYER = True
+    REQUIRES_POSTGIS_PARCELS_LAYER = False
 
     def initAlgorithm(self, config):
         """
@@ -169,8 +171,8 @@ class Parcels2PostGISAlgorithm(OrderedProcessingAlgorithm):
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
-        _layer_group = root.findGroup('Afkoppelkansenkaart')
+        _layer_group = root.findGroup('Afkoppelrendementskaart')
         if not _layer_group:
-            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
+            _layer_group = root.insertGroup(0, 'Afkoppelrendementskaart')
         return _layer_group
 

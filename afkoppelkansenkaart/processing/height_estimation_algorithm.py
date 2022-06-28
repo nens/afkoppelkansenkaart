@@ -51,6 +51,8 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT_DEM = "INPUT_DEM"
     INPUT_POL = "INPUT_POL"
+    REQUIRES_WFS_PARCELS_LAYER = False
+    REQUIRES_POSTGIS_PARCELS_LAYER = True
 
     def initAlgorithm(self, config):
         """
@@ -198,9 +200,9 @@ class HeightEstimatorAlgorithm(OrderedProcessingAlgorithm):
     @property
     def layer_group(self):
         root = QgsProject.instance().layerTreeRoot()
-        _layer_group = root.findGroup('Afkoppelkansenkaart')
+        _layer_group = root.findGroup('Afkoppelrendementskaart')
         if not _layer_group:
-            _layer_group = root.insertGroup(0, 'Afkoppelkansenkaart')
+            _layer_group = root.insertGroup(0, 'Afkoppelrendementskaart')
         return _layer_group
 
     def add_to_layer_tree_group(self, layer):
