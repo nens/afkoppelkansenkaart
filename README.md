@@ -1,3 +1,3 @@
 De Afkoppelrendementskaart is een plugin voor QGIS, waarmee op basis van een set aan brongegevens over de fysieke leefomgeving, een kwalitatieve inschatting wordt gemaakt van de fysieke kansrijkheid van afkoppelen en het rendement wat daarmee kan worden behaald. De data wordt opgeslagen in een GeoPackage. Om de percelen te verrijken met de benodigde informatie wordt PostGIS gebruikt. PostGIS is niet nodig om het resultaat te bekijken, de weging te veranderen of de aggregatie op buurt- of wijkniveau aan te passen. Voorliggende handleiding beschrijft het gebruik van de plugin.
-[20220524 Gebruikershandleiding Afkoppelrendementskaart_comments Jordie.docx]
+
 [Gebruikershandleiding Afkoppelrendementskaart V1.0.0.docx](https://github.com/nens/afkoppelkansenkaart/files/9810754/Gebruikershandleiding.Afkoppelrendementskaart.V1.0.0.docx)
